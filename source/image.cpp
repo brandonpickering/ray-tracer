@@ -2,42 +2,14 @@
 #include "image.hpp"
 
 
-pimagef imagef_new(size_t width, size_t height) {
-  pimagef img;
-  img.width = width;
-  img.height = height;
-  img.data = new color3f[width * height];
-  return img;
-}
-
-void imagef_delete(pimagef img) {
-  delete[] img.data;
-}
-
-
-pimageb imageb_new(size_t width, size_t height) {
-  pimageb img;
-  img.width = width;
-  img.height = height;
-  img.data = new color3b[width * height];
-  return img;
-}
-
-pimageb imageb_new(pimagef imgf) {
-  pimageb imgb = imageb_new(imgf.width, imgf.height);
-  for (size_t i = 0; i < imgf.height; i++)
-    for (size_t j = 0; j < imgf.width; j++)
-      imgb(i,j) = clampb(imgf(i,j));
-  return imgb;
-}
-
-void imageb_delete(pimageb img) {
-  delete[] img.data;
-}
-
-
-void write_ppm(pimageb img, FILE *file) {
-  fprintf(file, "P6 %zu %zu 255\n", img.width, img.height);
-  for (size_t i = 0; i < img.height; i++)
-    fwrite(img.data + i*img.width, 3, img.width, file);
+image_output_stream open_ppm_stream(FILE *file, size_t width, size_t height) {
+  fprintf(file, "P6 %zu %zu 255\n", width, height);
+  return [file](color3f color) {
+    int r = clamp((int) (color.r * 255), 0, 255);
+    int g = clamp((int) (color.g * 255), 0, 255);
+    int b = clamp((int) (color.b * 255), 0, 255);
+    fputc(r, file);
+    fputc(g, file);
+    fputc(b, file);
+  };
 }

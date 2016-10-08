@@ -11,6 +11,10 @@ inline vec3f vec(rtfloat x, rtfloat y, rtfloat z) {
   return {x, y, z};
 }
 
+inline color3f color(rtfloat r, rtfloat g, rtfloat b) {
+  return {r, g, b};
+}
+
 inline std::string str(vec3f v) {
   return stringf("(%f, %f, %f)", v.x, v.y, v.z);
 }

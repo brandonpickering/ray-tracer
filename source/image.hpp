@@ -2,36 +2,17 @@
 #define _RAYTRACER_IMAGE_HPP
 
 
+#include <functional>
+
 #include "common.hpp"
 
 
-struct pimagef {
-  size_t width, height;
-  color3f *data;
 
-  color3f &operator()(int row, int col);
-};
-
-pimagef imagef_new(size_t width, size_t height);
-void imagef_delete(pimagef);
+typedef std::function<void(color3f)> image_output_stream;
 
 
-struct pimageb {
-  size_t width, height;
-  color3b *data;
+image_output_stream open_ppm_stream(FILE *file, size_t width, size_t height);
 
-  color3b &operator()(int row, int col);
-};
-
-pimageb imageb_new(size_t width, size_t height);
-pimageb imageb_new(pimagef);
-void imageb_delete(pimageb);
-
-
-void write_ppm(pimageb, FILE *);
-
-
-#include "image.inl"
 
 
 #endif

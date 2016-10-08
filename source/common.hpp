@@ -32,7 +32,10 @@ struct vec3f {
   union { rtfloat z; rtfloat b; };
 };
 
+typedef vec3f color3f;
+
 vec3f vec(rtfloat x, rtfloat y, rtfloat z);
+color3f color(rtfloat r, rtfloat g, rtfloat b);
 
 std::string str(vec3f);
 
@@ -87,21 +90,6 @@ std::string str(hray3f);
 
 
 
-/* Colors */
-
-typedef vec3f color3f;
-
-struct color3b {
-  uint8_t r, g, b;
-};
-
-color3b rgb(uint8_t r, uint8_t g, uint8_t b);
-color3b clampb(color3f c);
-
-std::string str(color3b);
-
-
-
 /* 4x4 matrix over rtfloat */
 
 struct matrix4f {
@@ -132,7 +120,6 @@ matrix4f mat4_htranslate(vec3f v);
 
 #include "utils.inl"
 #include "vector.inl"
-#include "color.inl"
 #include "matrix.inl"
 
 
