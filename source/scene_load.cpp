@@ -18,6 +18,7 @@ struct input_env {
 
   object_material material;
 
+  bool identity;
   matrix4f transform_wo;
   matrix4f transform_ow;
 };
@@ -41,7 +42,33 @@ static void add_scene_object(scene *s, input_env *env, scene_object *obj) {
 static void exec_command(scene *s, input_env *env, string line) {
   string cmd = parse_cmd(env, line);
 
-  if (cmd == "sph") {
+  if (cmd == "cam") {
+    if (!env->identity)
+      fprintf(stderr, "Warning: line %d: Transformations do not currently "
+                      "apply to cameras\n", env->line_num);
+    s->camera.eye = hpoint(parse_vec3f(env, line));
+    s->camera.lower_left = hpoint(parse_vec3f(env, line));
+    s->camera.lower_right = hpoint(parse_vec3f(env, line));
+    s->camera.upper_left = hpoint(parse_vec3f(env, line));
+    s->camera.upper_right = hpoint(parse_vec3f(env, line));
+
+  } else if (cmd == "mat") {
+    env->material.ambient = parse_vec3f(env, line);
+    env->material.diffuse = parse_vec3f(env, line);
+    env->material.specular = parse_vec3f(env, line);
+    env->material.reflective = parse_vec3f(env, line);
+
+  } else if (cmd == "ltd") {
+    if (!env->identity)
+      fprintf(stderr, "Warning: line %d: Transformations do not currently "
+                      "apply to lights\n", env->line_num);
+    light_source light;
+    light.type = light_type::directional;
+    light.dir = hvec(parse_vec3f(env, line));
+    light.color = parse_vec3f(env, line);
+    s->lights.push_back(light);
+  
+  } else if (cmd == "sph") {
     sphere_object *sphere = new sphere_object;
     sphere->center = hpoint(parse_vec3f(env, line));
     sphere->radius = parse_float(env, line);
@@ -73,6 +100,7 @@ scene *scene_create(FILE *input) {
     0,
     false,
     { {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1} },
+    true,
     mat4_identity(),
     mat4_identity(),
   };
