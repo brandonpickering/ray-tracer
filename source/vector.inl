@@ -59,4 +59,22 @@ inline vec3f operator*(vec3f v, vec3f w) {
 }
 
 
+
+inline vec4f vec(rtfloat x, rtfloat y, rtfloat z, rtfloat w) {
+  return {x, y, z, w};
+}
+
+inline vec4f vec(vec3f xyz, rtfloat w) {
+  return {xyz.x, xyz.y, xyz.z, w};
+}
+
+inline hvec3f hvec(vec3f v) {
+  return {v.x, v.y, v.z, 0};
+}
+
+inline hpoint3f hpoint(vec3f p) {
+  return {p.x, p.y, p.z, 1};
+}
+
+
 #endif
