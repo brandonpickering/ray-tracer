@@ -11,7 +11,7 @@ EXEC=as2
 EXECDEV=as2-dev
 
 CC=g++
-CFLAGS=-Wall -Wextra -std=c++11 -O0
+CFLAGS=-Wall -Wextra -std=c++11 -O0 -DDEBUG_MODE
 LDFLAGS=-O0
 CFLAGSDEV=$(CFLAGS) -DGLFW_OUTPUT
 LDFLAGSDEV=$(LDFLAGS) -lglfw -lGL

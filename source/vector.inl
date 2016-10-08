@@ -4,20 +4,22 @@
 
 #include <cmath>
 
+#include "common.hpp"
+
 
 inline vec3f vec(rtfloat x, rtfloat y, rtfloat z) {
   return {x, y, z};
 }
 
-std::string str(vec3f v) {
+inline std::string str(vec3f v) {
   return stringf("(%f, %f, %f)", v.x, v.y, v.z);
 }
 
-rtfloat magnitude(vec3f v) {
+inline rtfloat magnitude(vec3f v) {
   return sqrt(dot(v, v));
 }
 
-vec3f normalize(vec3f v) {
+inline vec3f normalize(vec3f v) {
   rtfloat mag = magnitude(v);
   if (mag == 0)
     return v;

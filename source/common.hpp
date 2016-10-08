@@ -11,8 +11,13 @@ typedef double rtfloat;
 
 
 
+/* Helpful utilities and simple math functions */
+
 template <typename... T>
 std::string stringf(const char *format, T... args);
+
+template <typename T>
+T clamp(T x, T lo, T hi);
 
 #include "utils.inl"
 
@@ -57,6 +62,7 @@ struct color3b {
 };
 
 color3b rgb(uint8_t r, uint8_t g, uint8_t b);
+color3b clampb(color3f c);
 
 std::string str(color3b);
 
