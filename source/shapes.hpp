@@ -6,12 +6,12 @@
 #include "scene.hpp"
 
 
-struct sphere_data {
+struct sphere_object : scene_object {
   hpoint3f center;
   rtfloat radius;
-};
 
-rtfloat sphere_ray_test(void *data, hray3f ray);
+  rtfloat ray_test(hray3f ray);
+};
 
 
 #endif

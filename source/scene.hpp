@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "common.hpp"
+#include "image.hpp"
 
 
 
@@ -17,20 +18,14 @@ struct object_material {
 
 
 
-// Given an object and a ray, return the smallest positive t such that
-// ray.start + t * ray.dir lies on the object surface
-// If the ray never hits, return rtfloat_inf
-typedef rtfloat (*ray_intersect_func)(void *, hray3f);
-
-
 struct scene_object {
   object_material material;
 
   matrix4f transform_wo; // world to object space
   matrix4f transform_ow; // object space to world
 
-  void *shape_data;
-  ray_intersect_func ray_test;
+  virtual ~scene_object() {}
+  virtual rtfloat ray_test(hray3f ray) = 0;
   // TODO: Bounding box or whatever we use for efficiency
 };
 
@@ -72,8 +67,15 @@ struct scene_camera {
 struct scene {
   scene_camera camera;
   std::vector<light_source> lights;
-  std::vector<scene_object> objects;
+  std::vector<scene_object *> objects;
 };
+
+
+
+scene *scene_create(FILE *input);
+void scene_destroy(scene *);
+void scene_trace(scene *, size_t width, size_t height,
+                  image_output_stream write_pixel);
 
 
 

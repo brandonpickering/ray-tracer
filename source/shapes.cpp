@@ -5,15 +5,13 @@
 #include "shapes.hpp"
 
 
-rtfloat sphere_ray_test(void *data, hray3f ray) {
-  sphere_data *sphere = (sphere_data *) data;
-
-  vec3f p = project(ray.start) - project(sphere->center);
+rtfloat sphere_object::ray_test(hray3f ray) {
+  vec3f p = project(ray.start) - project(center);
   vec3f d = project(ray.dir);
 
   rtfloat a = dot(d, d);
   rtfloat b = 2 * dot(d, p);
-  rtfloat c = dot(p, p) - sphere->radius * sphere->radius;
+  rtfloat c = dot(p, p) - radius * radius;
 
   rtfloat disc = b*b - 4*a*c;
   if (disc < 0)
