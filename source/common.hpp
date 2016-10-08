@@ -3,6 +3,7 @@
 
 
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -10,6 +11,7 @@
 
 typedef double rtfloat;
 
+static const rtfloat rtfloat_inf = std::numeric_limits<rtfloat>().infinity();
 
 
 /* Helpful utilities and simple math functions */
