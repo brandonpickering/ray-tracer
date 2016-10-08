@@ -28,6 +28,9 @@ pimageb imageb_new(pimagef);
 void imageb_delete(pimageb);
 
 
+void write_ppm(pimageb, FILE *);
+
+
 #include "image.inl"
 
 

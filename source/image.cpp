@@ -34,3 +34,10 @@ pimageb imageb_new(pimagef imgf) {
 void imageb_delete(pimageb img) {
   delete[] img.data;
 }
+
+
+void write_ppm(pimageb img, FILE *file) {
+  fprintf(file, "P6 %zu %zu 255\n", img.width, img.height);
+  for (size_t i = 0; i < img.height; i++)
+    fwrite(img.data + i*img.width, 3, img.width, file);
+}
