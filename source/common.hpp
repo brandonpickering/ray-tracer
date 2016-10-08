@@ -61,14 +61,14 @@ struct vec4f {
   rtfloat x, y, z, w;
 };
 
-typedef vec4f hvec3f, hpoint3f;
+typedef vec4f hvec3f;
 
 vec4f vec(rtfloat x, rtfloat y, rtfloat z, rtfloat w);
 vec4f vec(vec3f xyz, rtfloat w);
 hvec3f hvec(vec3f v);
 hvec3f hvec(rtfloat x, rtfloat y, rtfloat z);
-hpoint3f hpoint(vec3f p);
-hpoint3f hpoint(rtfloat x, rtfloat y, rtfloat z);
+hvec3f hpoint(vec3f p);
+hvec3f hpoint(rtfloat x, rtfloat y, rtfloat z);
 
 std::string str(vec4f);
 std::string strp(vec4f);
@@ -79,14 +79,14 @@ vec3f project(vec4f);
 
 /* Ray in homogeneous coordinates */
 
-struct hray3f {
-  hpoint3f start;
-  hvec3f dir;
+struct ray3f {
+  vec3f start;
+  vec3f dir;
 };
 
-hray3f ray(hpoint3f start, hvec3f dir);
+ray3f ray(vec3f start, vec3f dir);
 
-std::string str(hray3f);
+std::string str(ray3f);
 
 
 
@@ -104,7 +104,7 @@ std::string str(matrix4f &);
 
 matrix4f operator*(matrix4f &, matrix4f &);
 vec4f operator*(matrix4f &, vec4f);
-hray3f operator*(matrix4f &, hray3f);
+ray3f operator*(matrix4f &, ray3f);
 
 matrix4f mat4_identity();
 matrix4f mat4_zero();

@@ -5,9 +5,9 @@
 #include "shapes.hpp"
 
 
-rtfloat sphere_object::ray_test(hray3f ray) {
-  vec3f p = project(ray.start) - project(center);
-  vec3f d = project(ray.dir);
+rtfloat sphere_object::ray_test(ray3f ray) {
+  vec3f p = ray.start - center;
+  vec3f d = ray.dir;
 
   rtfloat a = dot(d, d);
   rtfloat b = 2 * dot(d, p);
@@ -27,6 +27,6 @@ rtfloat sphere_object::ray_test(hray3f ray) {
 }
 
 
-hvec3f sphere_object::get_normal(hpoint3f point) {
-  return hvec(normalize(project(point) - project(center)));
+vec3f sphere_object::get_normal(vec3f point) {
+  return normalize(point - center);
 }

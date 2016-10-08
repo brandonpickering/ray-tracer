@@ -25,8 +25,8 @@ struct scene_object {
   matrix4f transform_ow; // object space to world
 
   virtual ~scene_object() {}
-  virtual rtfloat ray_test(hray3f ray) = 0;
-  virtual hvec3f get_normal(hpoint3f point) = 0;
+  virtual rtfloat ray_test(ray3f ray) = 0;
+  virtual vec3f get_normal(vec3f point) = 0;
 };
 
 
@@ -44,13 +44,13 @@ struct light_source {
   union {
     // if type = point
     struct {
-      hpoint3f pos;
+      vec3f pos;
       int falloff; // 0 for none, 1 for linear, 2 for quadratic
     };
 
     // if type = directional
     struct {
-      hvec3f dir;
+      vec3f dir;
     };
   };
 };
@@ -58,8 +58,8 @@ struct light_source {
 
 
 struct scene_camera {
-  hpoint3f eye;
-  hpoint3f lower_left, lower_right, upper_left, upper_right;
+  vec3f eye;
+  vec3f lower_left, lower_right, upper_left, upper_right;
 };
 
 

@@ -7,11 +7,11 @@
 
 
 struct sphere_object : scene_object {
-  hpoint3f center;
+  vec3f center;
   rtfloat radius;
 
-  virtual rtfloat ray_test(hray3f ray);
-  virtual hvec3f get_normal(hpoint3f point);
+  virtual rtfloat ray_test(ray3f ray);
+  virtual vec3f get_normal(vec3f point);
 };
 
 

@@ -80,11 +80,11 @@ inline hvec3f hvec(rtfloat x, rtfloat y, rtfloat z) {
   return {x, y, z, 0};
 }
 
-inline hpoint3f hpoint(vec3f p) {
+inline hvec3f hpoint(vec3f p) {
   return {p.x, p.y, p.z, 1};
 }
 
-inline hpoint3f hpoint(rtfloat x, rtfloat y, rtfloat z) {
+inline hvec3f hpoint(rtfloat x, rtfloat y, rtfloat z) {
   return {x, y, z, 1};
 }
 
@@ -105,12 +105,12 @@ inline vec3f project(vec4f v) {
 
 
 
-inline hray3f ray(hpoint3f start, hvec3f dir) {
+inline ray3f ray(vec3f start, vec3f dir) {
   return {start, dir};
 }
 
-inline std::string str(hray3f r) {
-  return stringf("Ray(%s, %s)", strp(r.start), strp(r.dir));
+inline std::string str(ray3f r) {
+  return stringf("Ray(%s, %s)", strp(hpoint(r.start)), strp(hvec(r.dir)));
 }
 
 
