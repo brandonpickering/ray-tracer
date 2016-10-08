@@ -17,7 +17,9 @@ static color3f trace_ray(scene *s, hray3f ray) {
 
   if (hit_obj == nullptr) return {0, 0, 0};
 
-  return hit_obj->material.ambient;
+  hpoint3f point = hpoint(project(ray.start) + min_t * project(ray.dir));
+
+  return project(hit_obj->get_normal(point));
 }
 
 

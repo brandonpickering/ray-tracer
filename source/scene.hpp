@@ -26,7 +26,7 @@ struct scene_object {
 
   virtual ~scene_object() {}
   virtual rtfloat ray_test(hray3f ray) = 0;
-  // TODO: Bounding box or whatever we use for efficiency
+  virtual hvec3f get_normal(hpoint3f point) = 0;
 };
 
 

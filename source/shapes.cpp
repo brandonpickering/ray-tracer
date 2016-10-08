@@ -25,3 +25,8 @@ rtfloat sphere_object::ray_test(hray3f ray) {
 
   return std::min(t1, t2);
 }
+
+
+hvec3f sphere_object::get_normal(hpoint3f point) {
+  return hvec(normalize(project(point) - project(center)));
+}

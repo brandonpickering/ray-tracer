@@ -60,6 +60,12 @@ static void exec_command(scene *s, input_env *env, string line) {
     env->material.specular = parse_vec3f(env, line);
     env->material.reflective = parse_vec3f(env, line);
 
+  } else if (cmd == "lta") {
+    light_source light;
+    light.type = light_type::ambient;
+    light.color = parse_vec3f(env, line);
+    s->lights.push_back(light);
+
   } else if (cmd == "ltd") {
     if (!env->identity)
       fprintf(stderr, "Warning: line %d: Transformations do not currently "
