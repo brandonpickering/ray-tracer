@@ -72,8 +72,31 @@ inline hvec3f hvec(vec3f v) {
   return {v.x, v.y, v.z, 0};
 }
 
+inline hvec3f hvec(rtfloat x, rtfloat y, rtfloat z) {
+  return {x, y, z, 0};
+}
+
 inline hpoint3f hpoint(vec3f p) {
   return {p.x, p.y, p.z, 1};
+}
+
+inline hpoint3f hpoint(rtfloat x, rtfloat y, rtfloat z) {
+  return {x, y, z, 1};
+}
+
+inline std::string str(vec4f v) {
+  return stringf("(%f, %f, %f, %f)", v.x, v.y, v.z, v.w);
+}
+
+inline std::string strp(vec4f v) {
+  return (v.w > 0 ? "P" : "V") + str(project(v));
+}
+
+inline vec3f project(vec4f v) {
+  vec3f r = {v.x, v.y, v.z};
+  if (v.w > 0)
+    r = r/v.w;
+  return r;
 }
 
 

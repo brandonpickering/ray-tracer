@@ -61,8 +61,14 @@ typedef vec4f hvec3f, hpoint3f;
 vec4f vec(rtfloat x, rtfloat y, rtfloat z, rtfloat w);
 vec4f vec(vec3f xyz, rtfloat w);
 hvec3f hvec(vec3f v);
+hvec3f hvec(rtfloat x, rtfloat y, rtfloat z);
 hpoint3f hpoint(vec3f p);
+hpoint3f hpoint(rtfloat x, rtfloat y, rtfloat z);
 
+std::string str(vec4f);
+std::string strp(vec4f);
+
+vec3f project(vec4f);
 
 
 
@@ -94,7 +100,7 @@ matrix4f mat4(std::vector<rtfloat> entries);
 std::string str(matrix4f &);
 
 matrix4f operator*(matrix4f &, matrix4f &);
-matrix4f operator*(matrix4f &, vec3f &);
+vec4f operator*(matrix4f &, vec4f);
 
 matrix4f mat4_identity();
 matrix4f mat4_zero();
