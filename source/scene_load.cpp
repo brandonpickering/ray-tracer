@@ -36,6 +36,8 @@ static void add_scene_object(scene *s, input_env *env, scene_object *obj) {
 
   obj->transform_wo = env->transform_wo;
   obj->transform_ow = env->transform_ow;
+
+  s->objects.push_back(obj);
 };
 
 

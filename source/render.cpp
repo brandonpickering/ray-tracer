@@ -4,7 +4,20 @@
 
 
 static color3f trace_ray(scene *s, hray3f ray) {
-  return { ray.dir.x, ray.dir.y, ray.dir.z };
+  rtfloat min_t = rtfloat_inf;
+  scene_object *hit_obj = nullptr;
+
+  for (scene_object *obj : s->objects) {
+    rtfloat t = obj->ray_test(ray);
+    if (t < min_t) {
+      min_t = t;
+      hit_obj = obj;
+    }
+  }
+
+  if (hit_obj == nullptr) return {0, 0, 0};
+
+  return hit_obj->material.ambient;
 }
 
 
