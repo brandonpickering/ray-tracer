@@ -3,8 +3,39 @@
 #include "scene.hpp"
 
 
-static color3f compute_shading(scene *s, vec3f point) {
+static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
+                                vec3f eye) {
+  color3f result = {0, 0, 0};
+  color3f ka = obj->material.ambient;
+  color3f kd = obj->material.diffuse;
+  color3f ks = obj->material.specular;
+  color3f kr = obj->material.reflective;
 
+  vec3f normal = obj->get_normal(point);
+
+  for (light_source light : s->lights) {
+    // TODO: Falloff
+
+    /* Ambient shading */
+    result = result + ka * light.color;
+
+    /* Diffuse shading */
+    if (light.type != light_type::ambient) {
+      vec3f light_dir;
+      if (light.type == light_type::directional)
+        light_dir = -light.dir;
+      else
+        light_dir = normalize(light.pos - point);
+
+      rtfloat diff_factor = std::max(dot(light_dir, normal), 0.0);
+      result = result + diff_factor * kd * light.color;
+    }
+
+    /* Specular shading */
+    // TODO: Specular shading
+  }
+
+  return result;
 }
 
 
@@ -13,6 +44,7 @@ static color3f trace_ray(scene *s, ray3f ray) {
   scene_object *hit_obj = nullptr;
 
   for (scene_object *obj : s->objects) {
+    // TODO: Transformation computations
     rtfloat t = obj->ray_test(ray);
     if (t < min_t) {
       min_t = t;
@@ -23,7 +55,7 @@ static color3f trace_ray(scene *s, ray3f ray) {
   if (hit_obj == nullptr) return {0, 0, 0};
 
   vec3f point = ray.start + min_t * ray.dir;
-  return hit_obj->get_normal(point);
+  return compute_shading(s, hit_obj, point, s->camera.eye);
 }
 
 

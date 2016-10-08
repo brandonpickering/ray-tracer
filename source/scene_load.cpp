@@ -72,7 +72,7 @@ static void exec_command(scene *s, input_env *env, string line) {
                       "apply to lights\n", env->line_num);
     light_source light;
     light.type = light_type::directional;
-    light.dir = parse_vec3f(env, line);
+    light.dir = normalize(parse_vec3f(env, line));
     light.color = parse_vec3f(env, line);
     s->lights.push_back(light);
   
