@@ -6,16 +6,22 @@
 
 
 int main() {
-  FILE *file = fopen("output.ppm", "w");
-  image_output_stream write_pixel = open_ppm_stream(file, 640, 480);
-  for (int i = 0; i < 640 * 480; i++) {
+  size_t w = 640, h = 480;
+  color3f *buffer = new color3f[w * h];
+
+  image_output_stream bstream = buffer_stream(buffer);
+  for (int i = 0; i < w * h; i++) {
     color3f c;
-    c.r = (float) rand() / RAND_MAX;
-    c.g = (float) rand() / RAND_MAX;
-    c.b = (float) (i % 640) / 639;
-    write_pixel(c);
+    c.r = (rtfloat) rand() / RAND_MAX;
+    c.g = (rtfloat) rand() / RAND_MAX;
+    c.b = (rtfloat) (i % w) / (w - 1);
+    bstream(c);
   }
-  fclose(file);
+
+  image_output_stream ppmstream = ppm_stream(stdout, w, h);
+  for (size_t i = 0; i < w * h; i++) {
+    ppmstream(buffer[i]);
+  }
 
   return 0;
 }
