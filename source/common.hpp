@@ -72,6 +72,19 @@ vec3f project(vec4f);
 
 
 
+/* Ray in homogeneous coordinates */
+
+struct hray3f {
+  hpoint3f start;
+  hvec3f dir;
+};
+
+hray3f ray(hpoint3f start, hvec3f dir);
+
+std::string str(hray3f);
+
+
+
 /* Colors */
 
 typedef vec3f color3f;
@@ -101,6 +114,7 @@ std::string str(matrix4f &);
 
 matrix4f operator*(matrix4f &, matrix4f &);
 vec4f operator*(matrix4f &, vec4f);
+hray3f operator*(matrix4f &, hray3f);
 
 matrix4f mat4_identity();
 matrix4f mat4_zero();

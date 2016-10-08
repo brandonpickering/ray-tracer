@@ -100,4 +100,14 @@ inline vec3f project(vec4f v) {
 }
 
 
+
+inline hray3f ray(hpoint3f start, hvec3f dir) {
+  return {start, dir};
+}
+
+inline std::string str(hray3f r) {
+  return stringf("Ray(%s, %s)", strp(r.start), strp(r.dir));
+}
+
+
 #endif

@@ -12,7 +12,7 @@ int main() {
     for (size_t j = 0; j < img.width; j++) {
       img(i,j).r = (rtfloat) rand() / RAND_MAX;
       img(i,j).g = (rtfloat) rand() / RAND_MAX;
-      img(i,j).b = (rtfloat) rand() / RAND_MAX;
+      img(i,j).b = (rtfloat) j / (img.width - 1);
     }
   }
 

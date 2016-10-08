@@ -62,3 +62,7 @@ vec4f operator*(matrix4f &m, vec4f v) {
 
   return vec(ra[0], ra[1], ra[2], ra[3]);
 }
+
+hray3f operator*(matrix4f &m, hray3f r) {
+  return { m * r.start, m * r.dir };
+}
