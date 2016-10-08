@@ -74,7 +74,7 @@ struct scene {
 
 scene *scene_create(FILE *input);
 void scene_destroy(scene *);
-void scene_trace(scene *, size_t width, size_t height,
+void scene_render(scene *, size_t width, size_t height,
                   image_output_stream write_pixel);
 
 

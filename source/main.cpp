@@ -9,7 +9,11 @@
 int main() {
   scene *s = scene_create(stdin);
   if (s == nullptr) exit(1);
-  scene_destroy(s);
 
+  size_t w = 640, h = 640;
+  image_output_stream write_pixel = ppm_stream(stdout, w, h);
+  scene_render(s, w, h, write_pixel);
+
+  scene_destroy(s);
   return 0;
 }
