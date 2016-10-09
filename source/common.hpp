@@ -42,6 +42,7 @@ std::string str(vec3f);
 rtfloat magnitude(vec3f);
 vec3f normalize(vec3f);
 rtfloat dot(vec3f, vec3f);
+vec3f cross(vec3f, vec3f);
 
 vec3f operator+(vec3f, vec3f);
 vec3f operator-(vec3f, vec3f);

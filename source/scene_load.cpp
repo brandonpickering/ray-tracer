@@ -98,8 +98,14 @@ static void exec_command(scene *s, input_env *env, string line) {
     sphere_object *sphere = new sphere_object;
     sphere->center = parse_vec3f(env, line);
     sphere->radius = parse_float(env, line);
-    
     add_scene_object(s, env, sphere);
+  
+  } else if (cmd == "tri") {
+    triangle_object *triangle = new triangle_object;
+    triangle->vertices[0] = parse_vec3f(env, line);
+    triangle->vertices[1] = parse_vec3f(env, line);
+    triangle->vertices[2] = parse_vec3f(env, line);
+    add_scene_object(s, env, triangle);
 
   } else {
     fprintf(stderr, "Warning: line %d: Unsupported command '%s'\n",

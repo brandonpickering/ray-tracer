@@ -34,6 +34,14 @@ inline rtfloat dot(vec3f v, vec3f w) {
   return v.x*w.x + v.y*w.y + v.z*w.z;
 }
 
+inline vec3f cross(vec3f v, vec3f w) {
+  vec3f r;
+  r.x = v.y*w.z - v.z*w.y;
+  r.y = v.z*w.x - v.x*w.z;
+  r.z = v.x*w.y - v.y*w.x;
+  return r;
+}
+
 inline vec3f operator+(vec3f v, vec3f w) {
   return {v.x + w.x, v.y + w.y, v.z + w.z};
 }

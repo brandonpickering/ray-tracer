@@ -15,4 +15,12 @@ struct sphere_object : scene_object {
 };
 
 
+struct triangle_object : scene_object {
+  vec3f vertices[3];
+
+  virtual rtfloat ray_test(ray3f ray);
+  virtual vec3f get_normal(vec3f point);
+};
+
+
 #endif
