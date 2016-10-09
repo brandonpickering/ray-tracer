@@ -3,6 +3,9 @@
 #include "scene.hpp"
 
 
+static color3f trace_color(scene *s, ray3f ray, int bounces);
+
+
 struct intersection {
   rtfloat dist;
   scene_object *obj;
@@ -22,8 +25,8 @@ static intersection trace_ray(scene *s, ray3f ray) {
 };
 
 
-static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
-                                vec3f eye) {
+static color3f compute_shading(scene *s, scene_object *obj, vec3f point, 
+                                vec3f eye, int bounces) {
   color3f result = {0, 0, 0};
   color3f ka = obj->material.ambient;
   color3f kd = obj->material.diffuse;
@@ -31,6 +34,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   color3f kr = obj->material.reflective;
 
   vec3f normal = obj->get_normal(point);
+  vec3f eye_dir = normalize(eye - point);
 
   for (light_source light : s->lights) {
     vec3f light_dir;
@@ -64,17 +68,26 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
     }
   }
 
+  /* Reflection */
+  if (bounces > 0) {
+    vec3f refl_dir = -eye_dir + 2*dot(normal, eye_dir) * normal;
+    // TODO: Again figure this constant out better
+    ray3f ray = { point + 0.001 * refl_dir, refl_dir };
+    color3f reflection = trace_color(s, ray, bounces-1);
+    result = result + kr * reflection;
+  }
+
   return result;
 }
 
 
-static color3f trace_color(scene *s, ray3f ray) {
+static color3f trace_color(scene *s, ray3f ray, int bounces) {
   intersection hit = trace_ray(s, ray);
 
   if (hit.obj == nullptr) return {0, 0, 0};
 
   vec3f point = ray.start + hit.dist * ray.dir;
-  return compute_shading(s, hit.obj, point, s->camera.eye);
+  return compute_shading(s, hit.obj, point, s->camera.eye, bounces);
 }
 
 
@@ -96,7 +109,8 @@ void scene_render(scene *s, size_t width, size_t height,
       vec3f p  = (1 - v)*p0 + v*p1;
 
       ray3f ray = { eye, p - eye };
-      write_pixel(trace_color(s, ray));
+      // TODO: Pick bounce constant better
+      write_pixel(trace_color(s, ray, 1));
     }
   }
 }

@@ -16,6 +16,8 @@ struct input_env {
   int line_num;
   bool error;
 
+  bool default_cam;
+
   bool default_mat;
   object_material material;
 
@@ -59,6 +61,7 @@ static void exec_command(scene *s, input_env *env, string line) {
     s->camera.lower_right = parse_vec3f(env, line);
     s->camera.upper_left = parse_vec3f(env, line);
     s->camera.upper_right = parse_vec3f(env, line);
+    env->default_cam = false;
 
   } else if (cmd == "mat") {
     env->material.ambient = parse_vec3f(env, line);
@@ -124,13 +127,12 @@ static void exec_command(scene *s, input_env *env, string line) {
 scene *scene_create(FILE *input) {
   scene *s = new scene;
 
-  s->camera = { {0,0,0}, {-1,-1,-1}, {1,-1,-1}, {-1,1,-1}, {1,1,-1} };
-  s->lights.clear();
-  s->objects.clear();
+  s->camera = { {0,0,0}, {-0.5,-0.5,-1}, {0.5,-0.5,-1}, {-0.5,0.5,-1}, {0.5,0.5,-1} };
 
   input_env env = {
     0,
     false,
+    true,
     true,
     { {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0} },
     true,
@@ -142,6 +144,8 @@ scene *scene_create(FILE *input) {
   while ((line = read_line(&env, input)) != "")
     exec_command(s, &env, line);
 
+  if (env.default_cam)
+    fprintf(stderr, "Warning: Using default camera\n");
   if (env.error) {
     scene_destroy(s);
     return nullptr;
