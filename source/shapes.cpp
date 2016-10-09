@@ -52,9 +52,12 @@ rtfloat triangle_object::ray_test(ray3f ray) {
   } else if ((det = w1.x*w2.z - w2.x*w1.z) != 0) {
     t1 = (w2.z*rp.x - w2.x*rp.z) / det;
     t2 = (w1.x*rp.z - w1.z*rp.x) / det;
-  } else {
+  } else if ((det = w1.y*w2.z - w2.y*w1.z) != 0) {
     t1 = (w2.z*rp.y - w2.y*rp.z) / det;
     t2 = (w1.y*rp.z - w1.z*rp.y) / det;
+  } else {
+    // Triangle vertices are colinear
+    return rtfloat_inf;
   }
 
   if (t1 < 0 || t1 > 1 || t2 < 0 || t2 > 1 || t1+t2 > 1)

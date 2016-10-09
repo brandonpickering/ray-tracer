@@ -34,6 +34,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   color3f kr = obj->material.reflective;
 
   vec3f normal = obj->get_normal(point);
+  // TODO: Flip normal if wrong direction
   vec3f eye_dir = normalize(eye - point);
 
   for (light_source light : s->lights) {
@@ -69,7 +70,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   }
 
   /* Reflection */
-  if (bounces > 0) {
+  if (bounces > 0 && (kr.r != 0 || kr.g != 0 || kr.b != 0)) {
     vec3f refl_dir = -eye_dir + 2*dot(normal, eye_dir) * normal;
     // TODO: Again figure this constant out better
     ray3f ray = { point + 0.001 * refl_dir, refl_dir };
@@ -110,7 +111,7 @@ void scene_render(scene *s, size_t width, size_t height,
 
       ray3f ray = { eye, p - eye };
       // TODO: Pick bounce constant better
-      write_pixel(trace_color(s, ray, 1));
+      write_pixel(trace_color(s, ray, 5));
     }
   }
 }
