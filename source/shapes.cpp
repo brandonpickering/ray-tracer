@@ -44,9 +44,18 @@ rtfloat triangle_object::ray_test(ray3f ray) {
 
   vec3f rp = (ray.start + s * ray.dir) - v3;
 
-  rtfloat invdet = 1/(w1.x*w2.y - w2.x*w1.y);
-  rtfloat t1 = invdet * (w2.y*rp.x - w2.x*rp.y);
-  rtfloat t2 = invdet * (w1.x*rp.y - w1.y*rp.x);
+  rtfloat t1 = rtfloat_inf, t2 = rtfloat_inf;
+  rtfloat det;
+  if ((det = w1.x*w2.y - w2.x*w1.y) != 0) {
+    t1 = (w2.y*rp.x - w2.x*rp.y) / det;
+    t2 = (w1.x*rp.y - w1.y*rp.x) / det;
+  } else if ((det = w1.x*w2.z - w2.x*w1.z) != 0) {
+    t1 = (w2.z*rp.x - w2.x*rp.z) / det;
+    t2 = (w1.x*rp.z - w1.z*rp.x) / det;
+  } else {
+    t1 = (w2.z*rp.y - w2.y*rp.z) / det;
+    t2 = (w1.y*rp.z - w1.z*rp.y) / det;
+  }
 
   if (t1 < 0 || t1 > 1 || t2 < 0 || t2 > 1 || t1+t2 > 1)
     return rtfloat_inf;
