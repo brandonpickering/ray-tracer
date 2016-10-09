@@ -16,6 +16,7 @@ struct input_env {
   int line_num;
   bool error;
 
+  bool default_mat;
   object_material material;
 
   bool identity;
@@ -27,11 +28,16 @@ struct input_env {
 static string read_line(input_env *, FILE *);
 static string parse_cmd(input_env *, string &);
 static rtfloat parse_float(input_env *, string &);
+static rtfloat parse_falloff(input_env *, string &);
 static vec3f parse_vec3f(input_env *, string &);
 static string parse_string(input_env *, string &);
 
 
 static void add_scene_object(scene *s, input_env *env, scene_object *obj) {
+  if (env->default_mat)
+    fprintf(stderr, "Warning: line %d: Using default material for object\n",
+            env->line_num);
+
   obj->material = env->material;
 
   obj->transform_wo = env->transform_wo;
@@ -59,6 +65,7 @@ static void exec_command(scene *s, input_env *env, string line) {
     env->material.diffuse = parse_vec3f(env, line);
     env->material.specular = parse_vec3f(env, line);
     env->material.reflective = parse_vec3f(env, line);
+    env->default_mat = false;
 
   } else if (cmd == "lta") {
     light_source light;
@@ -74,6 +81,17 @@ static void exec_command(scene *s, input_env *env, string line) {
     light.type = light_type::directional;
     light.dir = normalize(parse_vec3f(env, line));
     light.color = parse_vec3f(env, line);
+    s->lights.push_back(light);
+
+  } else if (cmd == "ltp") {
+    if (!env->identity)
+      fprintf(stderr, "Warning: line %d: Transformations do not currently "
+                      "apply to lights\n", env->line_num);
+    light_source light;
+    light.type = light_type::point;
+    light.pos = parse_vec3f(env, line);
+    light.color = parse_vec3f(env, line);
+    light.falloff = parse_falloff(env, line);
     s->lights.push_back(light);
   
   } else if (cmd == "sph") {
@@ -107,7 +125,8 @@ scene *scene_create(FILE *input) {
   input_env env = {
     0,
     false,
-    { {1,1,1}, {1,1,1}, {1,1,1}, {1,1,1} },
+    true,
+    { {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0} },
     true,
     mat4_identity(),
     mat4_identity(),
@@ -171,6 +190,7 @@ static rtfloat parse_float(input_env *env, string &line) {
 static rtfloat parse_falloff(input_env *env, string &line) {
   const char *endptr = line.c_str();
   int result = (int) strtol(line.c_str(), (char **) &endptr, 10);
+  line.erase(0, endptr - line.c_str());
 
   if (result < 0 || result > 2) {
     fprintf(stderr, "Error: line %d: Invalid falloff: %d\n", env->line_num);

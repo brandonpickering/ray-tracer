@@ -35,16 +35,18 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   for (light_source light : s->lights) {
     vec3f light_dir;
     rtfloat light_dist;
+    rtfloat falloff_factor = 1;
     if (light.type == light_type::directional) {
       light_dir = -light.dir;
       light_dist = rtfloat_inf;
     } else if (light.type == light_type::point) {
       light_dir = normalize(light.pos - point);
       light_dist = magnitude(light.pos - point);
+      falloff_factor = 1/std::pow(light_dist, light.falloff);
     }
     
     /* Ambient shading */
-    result = result + ka * light.color;
+    result = result + falloff_factor * ka * light.color;
 
     /* Shadow test */
     if (light.type != light_type::ambient) {
@@ -58,7 +60,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
     /* Diffuse shading */
     if (light.type != light_type::ambient) {
       rtfloat diff_factor = std::max(dot(light_dir, normal), 0.0);
-      result = result + diff_factor * kd * light.color;
+      result = result + falloff_factor * diff_factor * kd * light.color;
     }
   }
 
