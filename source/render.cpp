@@ -67,6 +67,15 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
       rtfloat diff_factor = std::max(dot(light_dir, normal), 0.0);
       result = result + falloff_factor * diff_factor * kd * light.color;
     }
+
+    /* Specular shading */
+    if (light.type != light_type::ambient) {
+      vec3f light_refl = -light_dir + 2*dot(normal, light_dir) * normal;
+      rtfloat spec_factor = std::max(dot(light_refl, eye_dir), 0.0);
+      // How should this constant be chosen?
+      spec_factor = std::pow(spec_factor, 100);
+      result = result + falloff_factor * spec_factor * ks * light.color;
+    }
   }
 
   /* Reflection */
