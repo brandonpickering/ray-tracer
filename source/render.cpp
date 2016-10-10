@@ -34,8 +34,8 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   color3f kr = obj->material.reflective;
 
   vec3f normal = obj->get_normal(point);
-  // TODO: Flip normal if wrong direction
   vec3f eye_dir = normalize(eye - point);
+  if (dot(normal, eye_dir) < 0) normal = -normal;
 
   for (light_source light : s->lights) {
     vec3f light_dir;
