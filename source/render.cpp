@@ -97,7 +97,7 @@ static color3f trace_color(scene *s, ray3f ray, int bounces) {
   if (hit.obj == nullptr) return {0, 0, 0};
 
   vec3f point = ray.start + hit.dist * ray.dir;
-  return compute_shading(s, hit.obj, point, s->camera.eye, bounces);
+  return compute_shading(s, hit.obj, point, ray.start, bounces);
 }
 
 
@@ -162,7 +162,7 @@ void scene_render(scene *s, size_t width, size_t height,
 
       // TODO: Pick bounce constant better
       // TODO: Pick sample grid size better
-      write_pixel(sample_color(s, pll, plr, pul, pur, s->camera.eye, 5, 5));
+      write_pixel(sample_color(s, pll, plr, pul, pur, s->camera.eye, 0, 5));
     }
   }
 }
