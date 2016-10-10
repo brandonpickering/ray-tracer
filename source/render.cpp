@@ -27,6 +27,8 @@ static intersection trace_ray(scene *s, ray3f ray) {
 
 static color3f compute_shading(scene *s, scene_object *obj, vec3f point, 
                                 vec3f eye, int bounces) {
+  static const rtfloat bounce_delt = 0.001;
+
   color3f result = {0, 0, 0};
   color3f ka = obj->material.ambient;
   color3f kd = obj->material.diffuse;
@@ -55,8 +57,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
 
     /* Shadow test */
     if (light.type != light_type::ambient) {
-      // TODO: Figure out the proper way to deal with this constant
-      ray3f ray = { point + 0.001 * light_dir, light_dir };
+      ray3f ray = { point + bounce_delt * light_dir, light_dir };
       intersection hit = trace_ray(s, ray);
       if (hit.dist < light_dist)
         continue;
@@ -72,7 +73,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
     if (light.type != light_type::ambient) {
       vec3f light_refl = -light_dir + 2*dot(normal, light_dir) * normal;
       rtfloat spec_factor = std::max(dot(light_refl, eye_dir), 0.0);
-      // How should this constant be chosen?
+      // TODO: How should this constant be chosen?
       spec_factor = std::pow(spec_factor, 100);
       result = result + falloff_factor * spec_factor * ks * light.color;
     }
@@ -81,8 +82,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   /* Reflection */
   if (bounces > 0 && (kr.r != 0 || kr.g != 0 || kr.b != 0)) {
     vec3f refl_dir = -eye_dir + 2*dot(normal, eye_dir) * normal;
-    // TODO: Again figure this constant out better
-    ray3f ray = { point + 0.001 * refl_dir, refl_dir };
+    ray3f ray = { point + bounce_delt * refl_dir, refl_dir };
     color3f reflection = trace_color(s, ray, bounces-1);
     result = result + kr * reflection;
   }
@@ -101,9 +101,43 @@ static color3f trace_color(scene *s, ray3f ray, int bounces) {
 }
 
 
+template <typename T, typename S>
+static inline T bilin(T ll, T lr, T ul, T ur, S u, S v) {
+  T p0 = (1 - u)*ll + u*lr;
+  T p1 = (1 - u)*ul + u*ur;
+  return (1 - v)*p0 + v*p1;
+}
+
+
+static color3f sample_color(scene *s, vec3f ll, vec3f lr, vec3f ul, vec3f ur, 
+                            vec3f eye, int grid_size, int bounces) {
+  bool jitter = grid_size > 0;
+  if (grid_size <= 0) grid_size = 1;
+
+  color3f result = {0, 0, 0};
+
+  for (int i = 0; i < grid_size; i++) {
+    for (int j = 0; j < grid_size; j++) {
+      rtfloat u = (j + 0.5) / grid_size;
+      rtfloat v = (i + 0.5) / grid_size;
+
+      if (jitter) {
+        u += ((rtfloat) rand() / RAND_MAX) / (2 * grid_size);
+        v += ((rtfloat) rand() / RAND_MAX) / (2 * grid_size);
+      }
+      
+      vec3f p = bilin(ll, lr, ul, ur, u, v);
+      ray3f ray = { eye, p - eye };
+      result = result + trace_color(s, ray, bounces) / (grid_size * grid_size);
+    }
+  }
+
+  return result;
+}
+
+
 void scene_render(scene *s, size_t width, size_t height,
                   image_output_stream write_pixel) {
-  vec3f eye = s->camera.eye;
   vec3f ll = s->camera.lower_left;
   vec3f lr = s->camera.lower_right;
   vec3f ul = s->camera.upper_left;
@@ -112,15 +146,23 @@ void scene_render(scene *s, size_t width, size_t height,
   for (size_t i = 0; i < height; i++) {
     for (size_t j = 0; j < width; j++) {
       size_t i0 = height - 1 - i;
-      rtfloat u = (rtfloat) ((j + 0.5) / width);
-      rtfloat v = (rtfloat) ((i0 + 0.5) / height);
-      vec3f p0 = (1 - u)*ll + u*lr;
-      vec3f p1 = (1 - u)*ul + u*ur;
-      vec3f p  = (1 - v)*p0 + v*p1;
+      size_t j0 = j;
+      size_t i1 = i0 + 1;
+      size_t j1 = j0 + 1;
 
-      ray3f ray = { eye, p - eye };
+      rtfloat u0 = (rtfloat) j0 / width;
+      rtfloat v0 = (rtfloat) i0 / height;
+      rtfloat u1 = (rtfloat) j1 / width;
+      rtfloat v1 = (rtfloat) i1 / height;
+    
+      vec3f pll = bilin(ll, lr, ul, ur, u0, v0);
+      vec3f plr = bilin(ll, lr, ul, ur, u1, v0);
+      vec3f pul = bilin(ll, lr, ul, ur, u0, v1);
+      vec3f pur = bilin(ll, lr, ul, ur, u1, v1);
+
       // TODO: Pick bounce constant better
-      write_pixel(trace_color(s, ray, 5));
+      // TODO: Pick sample grid size better
+      write_pixel(sample_color(s, pll, plr, pul, pur, s->camera.eye, 5, 5));
     }
   }
 }
