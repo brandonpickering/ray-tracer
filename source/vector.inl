@@ -118,7 +118,7 @@ inline ray3f ray(vec3f start, vec3f dir) {
 }
 
 inline std::string str(ray3f r) {
-  return stringf("Ray(%s, %s)", strp(hpoint(r.start)), strp(hvec(r.dir)));
+  return stringf("Ray(%s, %s)", strp(hpoint(r.start)).c_str(), strp(hvec(r.dir)).c_str());
 }
 
 

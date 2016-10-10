@@ -66,7 +66,7 @@ rtfloat triangle_object::ray_test(ray3f ray) {
   return s;
 }
 
-vec3f triangle_object::get_normal(vec3f point) {
+vec3f triangle_object::get_normal(vec3f) {
   return normalize(cross(vertices[0] - vertices[2], 
                           vertices[1] - vertices[2]));
 }

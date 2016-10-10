@@ -203,7 +203,8 @@ static rtfloat parse_falloff(input_env *env, string &line) {
   line.erase(0, endptr - line.c_str());
 
   if (result < 0 || result > 2) {
-    fprintf(stderr, "Error: line %d: Invalid falloff: %d\n", env->line_num);
+    fprintf(stderr, "Error: line %d: Invalid falloff: %d\n", 
+            env->line_num, result);
     env->error = true;
     return 0;
   }

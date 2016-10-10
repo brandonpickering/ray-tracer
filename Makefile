@@ -22,4 +22,4 @@ $(EXEC): $(OBJECTS)
 
 $(BUILDDIR)/%.o: $(SOURCEDIR)/%.cpp $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CC) -c -o $@ $(CLFAGS) $<
+	$(CC) -c -o $@ $(CFLAGS) $<
