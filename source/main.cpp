@@ -7,6 +7,7 @@
 #include "shapes.hpp"
 
 
+static FILE *out_file = stdout;
 static size_t img_width = 700, img_height = 700;
 
 
@@ -38,6 +39,20 @@ static void read_arguments(scene *s, int argc, char *argv[]) {
 
       img_width = (size_t) width;
       img_height = (size_t) height;
+    
+
+    } else if (arg == "--output" || arg == "-o") {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "Error: Expected filename after --output flag\n");
+        exit(1);
+      }
+      std::string filename = argv[++i];
+
+      out_file = fopen(filename.c_str(), "w");
+      if (out_file == nullptr) {
+        fprintf(stderr, "Error: Failed to open output file\n");
+        exit(1);
+      }
     }
   }
 }
@@ -48,8 +63,11 @@ int main(int argc, char *argv[]) {
   if (s == nullptr) exit(1);
   read_arguments(s, argc, argv);
 
-  image_output_stream write_pixel = ppm_stream(stdout, img_width, img_height);
+  image_output_stream write_pixel = ppm_stream(out_file, img_width, img_height);
   scene_render(s, img_width, img_height, write_pixel);
+
+  if (out_file != stdout)
+    fclose(out_file);
 
   scene_destroy(s);
   return 0;
