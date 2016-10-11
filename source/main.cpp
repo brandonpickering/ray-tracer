@@ -62,6 +62,14 @@ static void read_arguments(int argc, char *argv[]) {
 
 
     } else {
+      if (in_file != stdin) {
+        static bool warned = false;
+        if (!warned) {
+          fprintf(stderr, "Warning: Multiple input files, using last\n");
+          warned = true;
+        }
+        fclose(in_file);
+      }
       in_file = fopen(arg.c_str(), "r");
       if (in_file == nullptr) {
         fprintf(stderr, "Error: Failed to open %s\n", arg.c_str());
