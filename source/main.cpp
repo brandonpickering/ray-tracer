@@ -7,12 +7,13 @@
 #include "shapes.hpp"
 
 
+static FILE *in_file = stdin;
 static FILE *out_file = stdout;
 static size_t img_width = 700, img_height = 700;
 
 
-static void read_arguments(scene *s, int argc, char *argv[]) {
-  for (int i = 0; i < argc; i++) {
+static void read_arguments(int argc, char *argv[]) {
+  for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
 
     if (arg == "--size" || arg == "-s") {
@@ -50,7 +51,20 @@ static void read_arguments(scene *s, int argc, char *argv[]) {
 
       out_file = fopen(filename.c_str(), "w");
       if (out_file == nullptr) {
-        fprintf(stderr, "Error: Failed to open output file\n");
+        fprintf(stderr, "Error: Failed to open %s\n", filename.c_str());
+        exit(1);
+      }
+
+
+    } else if (arg[0] == '-') {
+      fprintf(stderr, "Error: Unknown flag: %s\n", arg.c_str());
+      exit(1);
+
+
+    } else {
+      in_file = fopen(arg.c_str(), "r");
+      if (in_file == nullptr) {
+        fprintf(stderr, "Error: Failed to open %s\n", arg.c_str());
         exit(1);
       }
     }
@@ -59,9 +73,12 @@ static void read_arguments(scene *s, int argc, char *argv[]) {
 
 
 int main(int argc, char *argv[]) {
-  scene *s = scene_create(stdin);
+  read_arguments(argc, argv);
+
+  scene *s = scene_create(in_file);
+  if (in_file != stdin)
+    fclose(in_file);
   if (s == nullptr) exit(1);
-  read_arguments(s, argc, argv);
 
   image_output_stream write_pixel = ppm_stream(out_file, img_width, img_height);
   scene_render(s, img_width, img_height, write_pixel);
