@@ -13,17 +13,17 @@ using std::vector;
 
 
 struct input_env {
-  int line_num;
-  bool error;
+  int line_num = 0;
+  bool error = false;
 
-  bool default_cam;
+  bool default_cam = true;
 
-  bool default_mat;
-  object_material material;
+  bool default_mat = true;
+  object_material material = { {0,0,0}, {0,0,0}, {0,0,0}, 1, {0,0,0} };
 
-  bool identity;
-  matrix4f transform_wo;
-  matrix4f transform_ow;
+  bool identity = true;
+  matrix4f transform_wo = mat4_identity();
+  matrix4f transform_ow = mat4_identity();
 };
 
 
@@ -67,6 +67,7 @@ static void exec_command(scene *s, input_env *env, string line) {
     env->material.ambient = parse_vec3f(env, line);
     env->material.diffuse = parse_vec3f(env, line);
     env->material.specular = parse_vec3f(env, line);
+    env->material.specular_power = parse_float(env, line);
     env->material.reflective = parse_vec3f(env, line);
     env->default_mat = false;
 
@@ -127,18 +128,10 @@ static void exec_command(scene *s, input_env *env, string line) {
 scene *scene_create(FILE *input) {
   scene *s = new scene;
 
-  s->camera = { {0,0,0}, {-0.5,-0.5,-1}, {0.5,-0.5,-1}, {-0.5,0.5,-1}, {0.5,0.5,-1} };
+  s->camera = { {0,0,0}, {-0.5,-0.5,-1}, {0.5,-0.5,-1}, 
+                {-0.5,0.5,-1}, {0.5,0.5,-1} };
 
-  input_env env = {
-    0,
-    false,
-    true,
-    true,
-    { {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0} },
-    true,
-    mat4_identity(),
-    mat4_identity(),
-  };
+  input_env env;
 
   string line;
   while ((line = read_line(&env, input)) != "")

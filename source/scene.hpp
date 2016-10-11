@@ -13,6 +13,7 @@ struct object_material {
   color3f ambient;
   color3f diffuse;
   color3f specular;
+  rtfloat specular_power;
   color3f reflective;
 };
 
