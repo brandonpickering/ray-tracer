@@ -74,6 +74,8 @@ static void read_arguments(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
   read_arguments(argc, argv);
+  if (in_file == stdin)
+    fprintf(stderr, "Reading from stdin...\n");
 
   scene *s = scene_create(in_file);
   if (in_file != stdin)
