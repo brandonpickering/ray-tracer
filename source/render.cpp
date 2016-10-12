@@ -12,6 +12,7 @@ struct intersection {
 };
 
 static intersection trace_ray(scene *s, ray3f ray) {
+  rtfloat invmagdir = 1 / magnitude(ray.dir);
   intersection result = { rtfloat_inf, nullptr };
 
   for (scene_object *obj : s->objects) {
@@ -23,9 +24,9 @@ static intersection trace_ray(scene *s, ray3f ray) {
     } else {
       ray3f oray = obj->transform_wo * ray;
       rtfloat ot = obj->ray_test(oray);
-      ray3f noray = { oray.start, ot * oray.dir };
-      ray3f nwray = obj->transform_ow * noray;
-      t = magnitude(nwray.dir) / magnitude(ray.dir);
+      vec3f nodir = ot * oray.dir;
+      vec3f nwdir = project(obj->transform_ow * hvec(nodir));
+      t = magnitude(nwdir) * invmagdir;
     }
 
     if (t < result.dist)
