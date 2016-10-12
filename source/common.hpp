@@ -97,15 +97,17 @@ struct matrix4f {
   rtfloat data[16];
 
   rtfloat &operator()(int row, int col);  
+  rtfloat operator()(int row, int col) const;
 };
 
 matrix4f mat4(std::vector<rtfloat> entries);
 
-std::string str(matrix4f &);
+std::string str(const matrix4f &);
 
-matrix4f operator*(matrix4f &, matrix4f &);
-vec4f operator*(matrix4f &, vec4f);
-ray3f operator*(matrix4f &, ray3f);
+matrix4f operator+(const matrix4f &, const matrix4f &);
+matrix4f operator*(const matrix4f &, const matrix4f &);
+vec4f operator*(const matrix4f &, vec4f);
+ray3f operator*(const matrix4f &, ray3f);
 
 matrix4f mat4_identity();
 matrix4f mat4_zero();
@@ -115,6 +117,7 @@ matrix4f mat4_hscale(rtfloat x, rtfloat y, rtfloat z);
 matrix4f mat4_hrotate_x(rtfloat a);
 matrix4f mat4_hrotate_y(rtfloat a);
 matrix4f mat4_hrotate_z(rtfloat a);
+matrix4f mat4_hrotate(vec3f axis, rtfloat a);
 matrix4f mat4_htranslate(vec3f v);
 
 

@@ -63,12 +63,37 @@ static void exec_command(scene *s, input_env *env, string line) {
     s->camera.upper_right = parse_vec3f(env, line);
     env->default_cam = false;
 
+  } else if (cmd == "xfz") {
+    env->transform_ow = mat4_identity();
+    env->transform_wo = mat4_identity();
+    env->identity = true;
+
   } else if (cmd == "xft") {
     vec3f t = parse_vec3f(env, line);
     matrix4f tm = mat4_htranslate(t);
     matrix4f im = mat4_htranslate(-t);
     env->transform_ow = env->transform_ow * tm;
     env->transform_wo = im * env->transform_wo;
+    env->identity = false;
+
+  } else if (cmd == "xfs") {
+    vec3f s = parse_vec3f(env, line);
+    matrix4f tm = mat4_hscale(s.x, s.y, s.z);
+    matrix4f im = mat4_hscale(1/s.x, 1/s.y, 1/s.z);
+    env->transform_ow = env->transform_ow * tm;
+    env->transform_wo = im * env->transform_wo;
+    env->identity = false;
+
+  } else if (cmd == "xfr") {
+    vec3f r = parse_vec3f(env, line);
+    rtfloat a = magnitude(r) * 3.14159265358979 / 180;
+    r = normalize(r);
+    matrix4f tm = mat4_hrotate(r, a);
+    fprintf(stderr, "%s\n", str(tm).c_str());
+    matrix4f im = mat4_hrotate(r, -a);
+    env->transform_ow = env->transform_ow * tm;
+    env->transform_wo = im * env->transform_wo;
+    env->identity = false;
 
   } else if (cmd == "lta") {
     light_source light;
