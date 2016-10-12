@@ -63,13 +63,12 @@ static void exec_command(scene *s, input_env *env, string line) {
     s->camera.upper_right = parse_vec3f(env, line);
     env->default_cam = false;
 
-  } else if (cmd == "mat") {
-    env->material.ambient = parse_vec3f(env, line);
-    env->material.diffuse = parse_vec3f(env, line);
-    env->material.specular = parse_vec3f(env, line);
-    env->material.specular_power = parse_float(env, line);
-    env->material.reflective = parse_vec3f(env, line);
-    env->default_mat = false;
+  } else if (cmd == "xft") {
+    vec3f t = parse_vec3f(env, line);
+    matrix4f tm = mat4_htranslate(t);
+    matrix4f im = mat4_htranslate(-t);
+    env->transform_ow = env->transform_ow * tm;
+    env->transform_wo = im * env->transform_wo;
 
   } else if (cmd == "lta") {
     light_source light;
@@ -98,6 +97,14 @@ static void exec_command(scene *s, input_env *env, string line) {
     light.falloff = parse_falloff(env, line);
     s->lights.push_back(light);
   
+  } else if (cmd == "mat") {
+    env->material.ambient = parse_vec3f(env, line);
+    env->material.diffuse = parse_vec3f(env, line);
+    env->material.specular = parse_vec3f(env, line);
+    env->material.specular_power = parse_float(env, line);
+    env->material.reflective = parse_vec3f(env, line);
+    env->default_mat = false;
+
   } else if (cmd == "sph") {
     sphere_object *sphere = new sphere_object;
     sphere->center = parse_vec3f(env, line);

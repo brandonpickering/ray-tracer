@@ -15,8 +15,12 @@ static intersection trace_ray(scene *s, ray3f ray) {
   intersection result = { rtfloat_inf, nullptr };
 
   for (scene_object *obj : s->objects) {
-    // TODO: Transformation computations
-    rtfloat t = obj->ray_test(ray);
+    ray3f oray = obj->transform_wo * ray;
+    rtfloat ot = obj->ray_test(oray);
+    ray3f noray = { oray.start, ot * oray.dir };
+    ray3f nwray = obj->transform_ow * noray;
+    rtfloat t = magnitude(nwray.dir) / magnitude(ray.dir);
+
     if (t < result.dist)
       result = { t, obj };
   }
@@ -36,7 +40,8 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   rtfloat sp = obj->material.specular_power;
   color3f kr = obj->material.reflective;
 
-  vec3f normal = obj->get_normal(point);
+  vec3f opoint = project(obj->transform_wo * hpoint(point));
+  vec3f normal = obj->get_normal(opoint);
   vec3f eye_dir = normalize(eye - point);
   if (dot(normal, eye_dir) < 0) normal = -normal;
 
