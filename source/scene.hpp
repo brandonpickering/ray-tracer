@@ -22,6 +22,7 @@ struct object_material {
 struct scene_object {
   object_material material;
 
+  bool transform_id;
   matrix4f transform_wo; // world to object space
   matrix4f transform_ow; // object space to world
 

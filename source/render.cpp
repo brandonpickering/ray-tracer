@@ -15,11 +15,18 @@ static intersection trace_ray(scene *s, ray3f ray) {
   intersection result = { rtfloat_inf, nullptr };
 
   for (scene_object *obj : s->objects) {
-    ray3f oray = obj->transform_wo * ray;
-    rtfloat ot = obj->ray_test(oray);
-    ray3f noray = { oray.start, ot * oray.dir };
-    ray3f nwray = obj->transform_ow * noray;
-    rtfloat t = magnitude(nwray.dir) / magnitude(ray.dir);
+    rtfloat t;
+    // TODO: On load, try to transform objects and leave their transforms as id
+    if (obj->transform_id) {
+      t = obj->ray_test(ray);
+
+    } else {
+      ray3f oray = obj->transform_wo * ray;
+      rtfloat ot = obj->ray_test(oray);
+      ray3f noray = { oray.start, ot * oray.dir };
+      ray3f nwray = obj->transform_ow * noray;
+      t = magnitude(nwray.dir) / magnitude(ray.dir);
+    }
 
     if (t < result.dist)
       result = { t, obj };

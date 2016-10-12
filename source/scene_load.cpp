@@ -42,6 +42,7 @@ static void add_scene_object(scene *s, input_env *env, scene_object *obj) {
 
   obj->material = env->material;
 
+  obj->transform_id = env->identity;
   obj->transform_wo = env->transform_wo;
   obj->transform_ow = env->transform_ow;
 
@@ -89,7 +90,6 @@ static void exec_command(scene *s, input_env *env, string line) {
     rtfloat a = magnitude(r) * 3.14159265358979 / 180;
     r = normalize(r);
     matrix4f tm = mat4_hrotate(r, a);
-    fprintf(stderr, "%s\n", str(tm).c_str());
     matrix4f im = mat4_hrotate(r, -a);
     env->transform_ow = env->transform_ow * tm;
     env->transform_wo = im * env->transform_wo;
