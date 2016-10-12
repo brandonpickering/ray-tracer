@@ -10,6 +10,7 @@
 static FILE *in_file = stdin;
 static FILE *out_file = stdout;
 static size_t img_width = 700, img_height = 700;
+static int sample_freq = 0;
 
 
 static void read_arguments(int argc, char *argv[]) {
@@ -56,6 +57,21 @@ static void read_arguments(int argc, char *argv[]) {
       }
 
 
+    } else if (arg == "--freq" || arg == "-f") {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "Error: Expected number after --freq flag\n");
+        exit(1);
+      }
+      std::string fs = argv[++i];
+
+      const char *endptr = fs.c_str();
+      sample_freq = (int) strtol(fs.c_str(), (char **) &endptr, 10);
+      if (endptr != fs.c_str() + fs.size() || sample_freq < 0) {
+        fprintf(stderr, "Error: Invalid argument to --freq\n");
+        exit(1);
+      }
+
+
     } else if (arg[0] == '-') {
       fprintf(stderr, "Error: Unknown flag: %s\n", arg.c_str());
       exit(1);
@@ -91,7 +107,7 @@ int main(int argc, char *argv[]) {
   if (s == nullptr) exit(1);
 
   image_output_stream write_pixel = ppm_stream(out_file, img_width, img_height);
-  scene_render(s, img_width, img_height, write_pixel);
+  scene_render(s, img_width, img_height, sample_freq, write_pixel);
 
   if (out_file != stdout)
     fclose(out_file);

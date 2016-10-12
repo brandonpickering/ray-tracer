@@ -148,7 +148,7 @@ static color3f sample_color(scene *s, vec3f ll, vec3f lr, vec3f ul, vec3f ur,
 }
 
 
-void scene_render(scene *s, size_t width, size_t height,
+void scene_render(scene *s, size_t width, size_t height, int sample_freq,
                   image_output_stream write_pixel) {
   vec3f ll = s->camera.lower_left;
   vec3f lr = s->camera.lower_right;
@@ -174,7 +174,8 @@ void scene_render(scene *s, size_t width, size_t height,
 
       // TODO: Pick bounce constant better
       // TODO: Pick sample grid size better
-      write_pixel(sample_color(s, pll, plr, pul, pur, s->camera.eye, 0, 5));
+      write_pixel(sample_color(s, pll, plr, pul, pur, 
+                    s->camera.eye, sample_freq, 5));
     }
   }
 }
