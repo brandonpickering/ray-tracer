@@ -6,6 +6,12 @@
 static color3f trace_color(scene *s, ray3f ray, int bounces);
 
 
+static vec3f trans_normal(vec3f normal, matrix4f trans, matrix4f trans_inv) {
+  vec3f result = project(transpose(trans_inv) * hvec(normal));
+  return normalize(det3(trans) * result);
+}
+
+
 struct intersection {
   rtfloat dist;
   scene_object *obj;
@@ -50,6 +56,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
 
   vec3f opoint = project(obj->transform_wo * hpoint(point));
   vec3f normal = obj->get_normal(opoint);
+  normal = trans_normal(normal, obj->transform_ow, obj->transform_wo);
   vec3f eye_dir = normalize(eye - point);
   if (dot(normal, eye_dir) < 0) normal = -normal;
 

@@ -101,6 +101,22 @@ inline ray3f operator*(const matrix4f &m, ray3f r) {
 }
 
 
+inline rtfloat det3(const matrix4f &m) {
+  return m(0,0) * (m(1,1)*m(2,2) - m(1,2)*m(2,1))
+          - m(0,1) * (m(1,0)*m(2,2) - m(1,2)*m(2,0))
+          + m(0,2) * (m(1,0)*m(2,1) - m(1,1)*m(2,0));
+}
+
+inline matrix4f transpose(const matrix4f &m) {
+  matrix4f result;
+  for (int i = 0; i < 4; i++)
+    for (int j = 0; j < 4; j++)
+      result(i,j) = m(j,i);
+  return result;
+}
+
+
+
 inline matrix4f mat4_identity() {
   return {{
     1, 0, 0, 0,

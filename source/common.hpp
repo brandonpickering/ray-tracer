@@ -109,6 +109,9 @@ matrix4f operator*(const matrix4f &, const matrix4f &);
 vec4f operator*(const matrix4f &, vec4f);
 ray3f operator*(const matrix4f &, ray3f);
 
+rtfloat det3(const matrix4f &);
+matrix4f transpose(const matrix4f &);
+
 matrix4f mat4_identity();
 matrix4f mat4_zero();
 matrix4f mat4_hzero();
