@@ -54,11 +54,17 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   rtfloat sp = obj->material.specular_power;
   color3f kr = obj->material.reflective;
 
-  vec3f opoint = project(obj->transform_wo * hpoint(point));
-  vec3f normal = obj->get_normal(opoint);
-  normal = trans_normal(normal, obj->transform_ow, obj->transform_wo);
+  vec3f normal;
+  if (obj->transform_id) {
+    normal = obj->get_normal(point);
+  } else {
+    vec3f opoint = project(obj->transform_wo * hpoint(point));
+    normal = obj->get_normal(opoint);
+    normal = trans_normal(normal, obj->transform_ow, obj->transform_wo);
+  }
   vec3f eye_dir = normalize(eye - point);
   if (dot(normal, eye_dir) < 0) normal = -normal;
+
 
   for (light_source light : s->lights) {
     vec3f light_dir;

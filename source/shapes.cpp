@@ -70,3 +70,9 @@ vec3f triangle_object::get_normal(vec3f) {
   return normalize(cross(vertices[0] - vertices[2], 
                           vertices[1] - vertices[2]));
 }
+
+bool triangle_object::apply_affine(const matrix4f &trans) {
+  for (int i = 0; i < 3; i++)
+    vertices[i] = project(trans * hpoint(vertices[i]));
+  return true;
+}

@@ -20,6 +20,8 @@ struct triangle_object : scene_object {
 
   virtual rtfloat ray_test(ray3f ray);
   virtual vec3f get_normal(vec3f point);
+  
+  virtual bool apply_affine(const matrix4f &trans);
 };
 
 

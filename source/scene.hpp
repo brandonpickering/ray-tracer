@@ -29,6 +29,8 @@ struct scene_object {
   virtual ~scene_object() {}
   virtual rtfloat ray_test(ray3f ray) = 0;
   virtual vec3f get_normal(vec3f point) = 0;
+
+  virtual bool apply_affine(const matrix4f &) { return false; }
 };
 
 
