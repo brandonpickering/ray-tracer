@@ -7,6 +7,7 @@
 #include "shapes.hpp"
 
 
+static std::string in_filename = "<stdin>";
 static FILE *in_file = stdin;
 static FILE *out_file = stdout;
 static size_t img_width = 700, img_height = 700;
@@ -86,6 +87,7 @@ static void read_arguments(int argc, char *argv[]) {
         }
         fclose(in_file);
       }
+      in_filename = arg;
       in_file = fopen(arg.c_str(), "r");
       if (in_file == nullptr) {
         fprintf(stderr, "Error: Failed to open %s\n", arg.c_str());
@@ -101,7 +103,7 @@ int main(int argc, char *argv[]) {
   if (in_file == stdin)
     fprintf(stderr, "Reading from stdin...\n");
 
-  scene *s = scene_create(in_file);
+  scene *s = scene_create(in_file, in_filename);
   if (in_file != stdin)
     fclose(in_file);
   if (s == nullptr) exit(1);

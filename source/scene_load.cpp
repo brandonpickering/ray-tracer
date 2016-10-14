@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "common.hpp"
+#include "parse.hpp"
 #include "scene.hpp"
 #include "shapes.hpp"
 
@@ -13,8 +14,9 @@ using std::vector;
 
 
 struct input_env {
-  int line_num = 0;
-  bool error = false;
+  parse_env penv;
+
+  scene *s;
 
   bool default_cam = true;
 
@@ -27,18 +29,9 @@ struct input_env {
 };
 
 
-static string read_line(input_env *, FILE *);
-static string parse_cmd(input_env *, string &);
-static rtfloat parse_float(input_env *, string &);
-static rtfloat parse_falloff(input_env *, string &);
-static vec3f parse_vec3f(input_env *, string &);
-static string parse_string(input_env *, string &);
-
-
-static void add_scene_object(scene *s, input_env *env, scene_object *obj) {
+static void add_scene_object(input_env *env, scene_object *obj) {
   if (env->default_mat)
-    fprintf(stderr, "Warning: line %d: Using default material for object\n",
-            env->line_num);
+    parse_warning(&env->penv, "Using default material for object");
 
   obj->material = env->material;
 
@@ -46,22 +39,22 @@ static void add_scene_object(scene *s, input_env *env, scene_object *obj) {
   obj->transform_wo = env->transform_wo;
   obj->transform_ow = env->transform_ow;
 
-  s->objects.push_back(obj);
+  env->s->objects.push_back(obj);
 };
 
 
-static void exec_command(scene *s, input_env *env, string line) {
-  string cmd = parse_cmd(env, line);
+static void exec_command(input_env *env, string line) {
+  string cmd = parse_cmd(&env->penv, &line);
 
   if (cmd == "cam") {
     if (!env->identity)
-      fprintf(stderr, "Warning: line %d: Transformations do not currently "
-                      "apply to cameras\n", env->line_num);
-    s->camera.eye = parse_vec3f(env, line);
-    s->camera.lower_left = parse_vec3f(env, line);
-    s->camera.lower_right = parse_vec3f(env, line);
-    s->camera.upper_left = parse_vec3f(env, line);
-    s->camera.upper_right = parse_vec3f(env, line);
+      parse_warning(&env->penv, "Transformations do not currently "
+                                "apply to cameras");
+    env->s->camera.eye = parse_vec3f(&env->penv, &line);
+    env->s->camera.lower_left = parse_vec3f(&env->penv, &line);
+    env->s->camera.lower_right = parse_vec3f(&env->penv, &line);
+    env->s->camera.upper_left = parse_vec3f(&env->penv, &line);
+    env->s->camera.upper_right = parse_vec3f(&env->penv, &line);
     env->default_cam = false;
 
   } else if (cmd == "xfz") {
@@ -70,7 +63,7 @@ static void exec_command(scene *s, input_env *env, string line) {
     env->identity = true;
 
   } else if (cmd == "xft") {
-    vec3f t = parse_vec3f(env, line);
+    vec3f t = parse_vec3f(&env->penv, &line);
     matrix4f tm = mat4_htranslate(t);
     matrix4f im = mat4_htranslate(-t);
     env->transform_ow = env->transform_ow * tm;
@@ -78,7 +71,7 @@ static void exec_command(scene *s, input_env *env, string line) {
     env->identity = false;
 
   } else if (cmd == "xfs") {
-    vec3f s = parse_vec3f(env, line);
+    vec3f s = parse_vec3f(&env->penv, &line);
     matrix4f tm = mat4_hscale(s.x, s.y, s.z);
     matrix4f im = mat4_hscale(1/s.x, 1/s.y, 1/s.z);
     env->transform_ow = env->transform_ow * tm;
@@ -86,7 +79,7 @@ static void exec_command(scene *s, input_env *env, string line) {
     env->identity = false;
 
   } else if (cmd == "xfr") {
-    vec3f r = parse_vec3f(env, line);
+    vec3f r = parse_vec3f(&env->penv, &line);
     rtfloat a = magnitude(r) * 3.14159265358979 / 180;
     r = normalize(r);
     matrix4f tm = mat4_hrotate(r, a);
@@ -98,85 +91,86 @@ static void exec_command(scene *s, input_env *env, string line) {
   } else if (cmd == "lta") {
     light_source light;
     light.type = light_type::ambient;
-    light.color = parse_vec3f(env, line);
-    s->lights.push_back(light);
+    light.color = parse_vec3f(&env->penv, &line);
+    env->s->lights.push_back(light);
 
   } else if (cmd == "ltd") {
     if (!env->identity)
-      fprintf(stderr, "Warning: line %d: Transformations do not currently "
-                      "apply to lights\n", env->line_num);
+      parse_warning(&env->penv, "Transformations do not currently apply "
+                                "to lights");
     light_source light;
     light.type = light_type::directional;
-    light.dir = normalize(parse_vec3f(env, line));
-    light.color = parse_vec3f(env, line);
-    s->lights.push_back(light);
+    light.dir = normalize(parse_vec3f(&env->penv, &line));
+    light.color = parse_vec3f(&env->penv, &line);
+    env->s->lights.push_back(light);
 
   } else if (cmd == "ltp") {
     if (!env->identity)
-      fprintf(stderr, "Warning: line %d: Transformations do not currently "
-                      "apply to lights\n", env->line_num);
+      parse_warning(&env->penv, "Transformations do not currently apply "
+                                "to lights");
     light_source light;
     light.type = light_type::point;
-    light.pos = parse_vec3f(env, line);
-    light.color = parse_vec3f(env, line);
-    light.falloff = parse_falloff(env, line);
-    s->lights.push_back(light);
+    light.pos = parse_vec3f(&env->penv, &line);
+    light.color = parse_vec3f(&env->penv, &line);
+    light.falloff = (int) parse_opt_int(&env->penv, &line, 0);
+    if (light.falloff < 0 || light.falloff > 2) {
+      parse_error(&env->penv, "Invalid falloff: %d", light.falloff);
+      light.falloff = 0;
+    }
+    env->s->lights.push_back(light);
   
   } else if (cmd == "mat") {
-    env->material.ambient = parse_vec3f(env, line);
-    env->material.diffuse = parse_vec3f(env, line);
-    env->material.specular = parse_vec3f(env, line);
-    env->material.specular_power = parse_float(env, line);
-    env->material.reflective = parse_vec3f(env, line);
+    env->material.ambient = parse_vec3f(&env->penv, &line);
+    env->material.diffuse = parse_vec3f(&env->penv, &line);
+    env->material.specular = parse_vec3f(&env->penv, &line);
+    env->material.specular_power = (rtfloat) parse_float(&env->penv, &line);
+    env->material.reflective = parse_vec3f(&env->penv, &line);
     env->default_mat = false;
 
   } else if (cmd == "sph") {
     sphere_object *sphere = new sphere_object;
-    sphere->center = parse_vec3f(env, line);
-    sphere->radius = parse_float(env, line);
-    add_scene_object(s, env, sphere);
+    sphere->center = parse_vec3f(&env->penv, &line);
+    sphere->radius = (rtfloat) parse_float(&env->penv, &line);
+    add_scene_object(env, sphere);
   
   } else if (cmd == "tri") {
     triangle_object *triangle = new triangle_object;
-    triangle->vertices[0] = parse_vec3f(env, line);
-    triangle->vertices[1] = parse_vec3f(env, line);
-    triangle->vertices[2] = parse_vec3f(env, line);
-    add_scene_object(s, env, triangle);
+    triangle->vertices[0] = parse_vec3f(&env->penv, &line);
+    triangle->vertices[1] = parse_vec3f(&env->penv, &line);
+    triangle->vertices[2] = parse_vec3f(&env->penv, &line);
+    add_scene_object(env, triangle);
 
   } else {
-    fprintf(stderr, "Warning: line %d: Unsupported command '%s'\n",
-            env->line_num, cmd.c_str());
+    parse_warning(&env->penv, "Unsupported command '%s'", cmd.c_str());
     return;
   }
 
   while (isspace(line[0])) line.erase(0, 1);
-  if (line.size() > 0) {
-    fprintf(stderr, "Warning: line %d: Extraneous arguments '%s'\n",
-            env->line_num, line.c_str());
-  }
+  if (line.size() > 0)
+    parse_warning(&env->penv, "Extraneous arguments '%s'", line.c_str());
 }
 
 
-scene *scene_create(FILE *input) {
-  scene *s = new scene;
-
-  s->camera = { {0,0,0}, {-0.5,-0.5,-1}, {0.5,-0.5,-1}, 
-                {-0.5,0.5,-1}, {0.5,0.5,-1} };
-
+scene *scene_create(FILE *input, std::string filename) {
   input_env env;
+  env.penv = parse_env_create(filename);
+
+  env.s = new scene;
+  env.s->camera = { {0,0,0}, {-0.5,-0.5,-1}, {0.5,-0.5,-1}, 
+                   {-0.5,0.5,-1}, {0.5,0.5,-1} };
 
   string line;
-  while ((line = read_line(&env, input)) != "")
-    exec_command(s, &env, line);
+  while ((line = read_line(&env.penv, input)) != "")
+    exec_command(&env, line);
 
   if (env.default_cam)
     fprintf(stderr, "Warning: Using default camera\n");
-  if (env.error) {
-    scene_destroy(s);
+  if (env.penv.error) {
+    scene_destroy(env.s);
     return nullptr;
   }
 
-  return s;
+  return env.s;
 }
 
 
@@ -186,100 +180,4 @@ void scene_destroy(scene *s) {
   for (scene_object *obj : s->objects)
     delete obj;
   delete s;
-}
-
-
-
-/* Parsing */
-
-
-static string parse_cmd(input_env *env, string &line) {
-  string cmd;
-  size_t i = 0;
-  while (i < line.size() && isspace(line[i])) i++;
-  while (i < line.size() && !isspace(line[i])) cmd += line[i++];
-  line.erase(0, i);
-
-  if (cmd.size() == 0) {
-    fprintf(stderr, "Error: line %d: Expected command"
-                    " (this should not have happened)\n", env->line_num);
-    env->error = true;
-  }
-  return cmd;
-}
-
-static rtfloat parse_float(input_env *env, string &line) {
-  const char *endptr = line.c_str();
-  rtfloat result = (rtfloat) strtod(line.c_str(), (char **) &endptr);
-
-  size_t size = endptr - line.c_str();
-  line.erase(0, size);
-
-  if (size == 0) {
-    fprintf(stderr, "Error: line %d: Expected number\n", env->line_num);
-    env->error = true;
-  }
-  return result;
-}
-
-static rtfloat parse_falloff(input_env *env, string &line) {
-  const char *endptr = line.c_str();
-  int result = (int) strtol(line.c_str(), (char **) &endptr, 10);
-  line.erase(0, endptr - line.c_str());
-
-  if (result < 0 || result > 2) {
-    fprintf(stderr, "Error: line %d: Invalid falloff: %d\n", 
-            env->line_num, result);
-    env->error = true;
-    return 0;
-  }
-  return result;
-}
-
-static vec3f parse_vec3f(input_env *env, string &line) {
-  vec3f result;
-  result.x = parse_float(env, line);
-  result.y = parse_float(env, line);
-  result.z = parse_float(env, line);
-  return result;
-}
-
-static string parse_string(input_env *env, string &line) {
-  size_t i = 0;
-  while (i < line.size() && isspace(line[i])) i++;
-  if (i == line.size() || line[i++] != '"') {
-    fprintf(stderr, "Error: line %d: Expected string\n", env->line_num);
-    env->error = true;
-    return "";
-  }
-
-  string result;
-  while (i < line.size() && line[i] != '"') result += line[i++];
-  if (i == line.size()) {
-    fprintf(stderr, "Error: line %d: Expected closing quote\n", env->line_num);
-    env->error = true;
-  }
-  
-  line.erase(0, i);
-  return result;
-}
-
-
-static string read_line(input_env *env, FILE *input) {
-  while (true) {
-    char c = fgetc(input);
-    if (c == EOF) return "";
-
-    string result = "";
-    bool content = false;
-    while (c != '\n' && c != EOF) {
-      content = content || !isspace(c);
-      result += c;
-      c = fgetc(input);
-    }
-
-    env->line_num += 1;
-
-    if (content) return result;
-  }
 }
