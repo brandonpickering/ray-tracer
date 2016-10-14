@@ -6,7 +6,7 @@
 
 
 
-rtfloat sphere_object::ray_test(ray3f ray) {
+ray_intersection sphere_object::ray_test(ray3f ray) {
   vec3f p = ray.start - center;
   vec3f d = ray.dir;
 
@@ -16,7 +16,7 @@ rtfloat sphere_object::ray_test(ray3f ray) {
 
   rtfloat disc = b*b - 4*a*c;
   if (disc < 0)
-    return rtfloat_inf;
+    return no_intersection(this);
 
   rtfloat sd = sqrt(disc);
   rtfloat t1 = (-b + sd)/(2*a);
@@ -24,23 +24,25 @@ rtfloat sphere_object::ray_test(ray3f ray) {
   if (t1 < 0) t1 = rtfloat_inf;
   if (t2 < 0) t2 = rtfloat_inf;
 
-  return std::min(t1, t2);
+  rtfloat dist = std::min(t1, t2);
+  if (dist < rtfloat_inf) {
+    vec3f point = ray.start + dist * ray.dir;
+    vec3f normal = normalize(point - center);
+    return intersection(this, dist, normal);
+  }
+
+  return no_intersection(this);
 }
 
 
-vec3f sphere_object::get_normal(vec3f point) {
-  return normalize(point - center);
-}
 
-
-
-rtfloat triangle_object::ray_test(ray3f ray) {
+ray_intersection triangle_object::ray_test(ray3f ray) {
   vec3f v1 = vertices[0], v2 = vertices[1], v3 = vertices[2];
   vec3f w1 = v1 - v3, w2 = v2 - v3;
   vec3f n = normalize(cross(w1, w2));
 
   rtfloat s = dot(n, v1 - ray.start) / dot(n, ray.dir);
-  if (s == rtfloat_inf || s < 0) return rtfloat_inf;
+  if (s == rtfloat_inf || s < 0) return no_intersection(this);
 
   vec3f rp = (ray.start + s * ray.dir) - v3;
 
@@ -57,19 +59,15 @@ rtfloat triangle_object::ray_test(ray3f ray) {
     t2 = (w1.y*rp.z - w1.z*rp.y) / det;
   } else {
     // Triangle vertices are colinear
-    return rtfloat_inf;
+    return no_intersection(this);
   }
 
   if (t1 < 0 || t1 > 1 || t2 < 0 || t2 > 1 || t1+t2 > 1)
-    return rtfloat_inf;
+    return no_intersection(this);
 
-  return s;
+  return intersection(this, s, n);
 }
 
-vec3f triangle_object::get_normal(vec3f) {
-  return normalize(cross(vertices[0] - vertices[2], 
-                          vertices[1] - vertices[2]));
-}
 
 bool triangle_object::apply_affine(const matrix4f &trans) {
   for (int i = 0; i < 3; i++)

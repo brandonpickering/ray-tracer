@@ -12,31 +12,41 @@ static vec3f trans_normal(vec3f normal, matrix4f trans, matrix4f trans_inv) {
 }
 
 
-struct intersection {
-  rtfloat dist;
-  scene_object *obj;
-};
+ray_intersection intersection(scene_object *obj, rtfloat dist, vec3f normal) {
+  return {dist, normal, obj};
+}
 
-static intersection trace_ray(scene *s, ray3f ray) {
+ray_intersection no_intersection(scene_object *obj) {
+  return {rtfloat_inf, vec(0,0,0), obj};
+}
+
+
+
+static ray_intersection trace_ray(scene *s, ray3f ray) {
   rtfloat invmagdir = 1 / magnitude(ray.dir);
-  intersection result = { rtfloat_inf, nullptr };
+  ray_intersection result = no_intersection(nullptr);
 
   for (scene_object *obj : s->objects) {
-    rtfloat t;
+    ray_intersection inter = no_intersection(obj);
+
     // TODO: On load, try to transform objects and leave their transforms as id
     if (obj->transform_id) {
-      t = obj->ray_test(ray);
+      inter = obj->ray_test(ray);
 
     } else {
       ray3f oray = obj->transform_wo * ray;
-      rtfloat ot = obj->ray_test(oray);
-      vec3f nodir = ot * oray.dir;
+      ray_intersection ointer = obj->ray_test(oray);
+      vec3f nodir = ointer.dist * oray.dir;
       vec3f nwdir = project(obj->transform_ow * hvec(nodir));
-      t = magnitude(nwdir) * invmagdir;
+      inter.dist = magnitude(nwdir) * invmagdir;
+
+      if (inter.dist < result.dist)
+        inter.normal = trans_normal(ointer.normal, obj->transform_ow,
+                                    obj->transform_wo);
     }
 
-    if (t < result.dist)
-      result = { t, obj };
+    if (inter.dist < result.dist)
+      result = inter;
   }
 
   return result;
@@ -44,7 +54,7 @@ static intersection trace_ray(scene *s, ray3f ray) {
 
 
 static color3f compute_shading(scene *s, scene_object *obj, vec3f point, 
-                                vec3f eye, int bounces) {
+                                vec3f normal, vec3f eye, int bounces) {
   static const rtfloat bounce_delt = 0.001;
 
   color3f result = {0, 0, 0};
@@ -54,14 +64,6 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
   rtfloat sp = obj->material.specular_power;
   color3f kr = obj->material.reflective;
 
-  vec3f normal;
-  if (obj->transform_id) {
-    normal = obj->get_normal(point);
-  } else {
-    vec3f opoint = project(obj->transform_wo * hpoint(point));
-    normal = obj->get_normal(opoint);
-    normal = trans_normal(normal, obj->transform_ow, obj->transform_wo);
-  }
   vec3f eye_dir = normalize(eye - point);
   if (dot(normal, eye_dir) < 0) normal = -normal;
 
@@ -85,7 +87,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
     /* Shadow test */
     if (light.type != light_type::ambient) {
       ray3f ray = { point + bounce_delt * light_dir, light_dir };
-      intersection hit = trace_ray(s, ray);
+      ray_intersection hit = trace_ray(s, ray);
       if (hit.dist < light_dist)
         continue;
     }
@@ -118,12 +120,15 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
 
 
 static color3f trace_color(scene *s, ray3f ray, int bounces) {
-  intersection hit = trace_ray(s, ray);
+  ray_intersection hit = trace_ray(s, ray);
 
-  if (hit.obj == nullptr) return {0, 0, 0};
+  if (hit.dist < rtfloat_inf) {
+    vec3f point = ray.start + hit.dist * ray.dir;
+    return compute_shading(s, hit.obj, point, hit.normal, ray.start, bounces);
 
-  vec3f point = ray.start + hit.dist * ray.dir;
-  return compute_shading(s, hit.obj, point, ray.start, bounces);
+  } else {
+    return {0, 0, 0};
+  }
 }
 
 

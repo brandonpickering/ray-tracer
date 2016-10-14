@@ -8,6 +8,8 @@
 #include "image.hpp"
 
 
+struct scene_object;
+
 
 struct object_material {
   color3f ambient;
@@ -17,6 +19,14 @@ struct object_material {
   color3f reflective;
 };
 
+struct ray_intersection {
+  rtfloat dist;
+  vec3f normal;
+  scene_object *obj;
+};
+
+ray_intersection intersection(scene_object *obj, rtfloat dist, vec3f normal);
+ray_intersection no_intersection(scene_object *obj);
 
 
 struct scene_object {
@@ -27,8 +37,7 @@ struct scene_object {
   matrix4f transform_ow; // object space to world
 
   virtual ~scene_object() {}
-  virtual rtfloat ray_test(ray3f ray) = 0;
-  virtual vec3f get_normal(vec3f point) = 0;
+  virtual ray_intersection ray_test(ray3f ray) = 0;
 
   virtual bool apply_affine(const matrix4f &) { return false; }
 };
