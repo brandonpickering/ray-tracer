@@ -1,9 +1,11 @@
+#include <cstdio>
+
 #include "common.hpp"
 #include "image.hpp"
 
 
 bool done(image_ostream *stream) {
-  return stream->cur_col >= stream->width && stream->cur_row >= stream->height;
+  return stream->cur_row >= stream->height;
 }
 
 void operator<<(image_ostream *stream, color3f pixel) {
