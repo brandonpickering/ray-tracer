@@ -73,14 +73,11 @@ inline matrix4f operator*(const matrix4f &m, const matrix4f &n) {
 }
 
 inline vec4f operator*(const matrix4f &m, vec4f v) {
-  rtfloat va[] = {v.x, v.y, v.z, v.w};
-  rtfloat ra[] = {0, 0, 0, 0};
-
+  vec4f r = vec(0, 0, 0, 0);
   for (int i = 0; i < 4; i++)
     for (int k = 0; k < 4; k++)
-      ra[i] += m(i,k) * va[k];
-
-  return vec(ra[0], ra[1], ra[2], ra[3]);
+      r.data[i] += m(i,k) * v.data[k];
+  return r;
 }
 
 inline ray3f operator*(const matrix4f &m, ray3f r) {

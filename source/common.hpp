@@ -27,9 +27,15 @@ T clamp(T x, T lo, T hi);
 /* Vector in 3-dim rtfloat space */
 
 struct vec3f {
-  union { rtfloat x; rtfloat r; };
-  union { rtfloat y; rtfloat g; };
-  union { rtfloat z; rtfloat b; };
+  union {
+    rtfloat data[3];
+    struct {
+      rtfloat x, y, z;
+    };
+    struct {
+      rtfloat r, g, b;
+    };
+  };
 };
 
 typedef vec3f color3f;
@@ -59,7 +65,12 @@ vec3f operator*(vec3f, vec3f); // Hadamard product
 /* Vector in 4-dim rtfloat space */
 
 struct vec4f {
-  rtfloat x, y, z, w;
+  union {
+    rtfloat data[4];
+    struct {
+      rtfloat x, y, z, w;
+    };
+  };
 };
 
 typedef vec4f hvec3f;
@@ -129,23 +140,32 @@ matrix4f mat4_htranslate(vec3f v);
 
 struct aa_box3f {
   union {
-    vec3f low_v;
-    struct {
-      rtfloat low_x;
-      rtfloat low_y;
-      rtfloat low_z;
-    };
-  };
+    vec3f vs[2];
 
-  union {
-    vec3f high_v;
     struct {
-      rtfloat high_x;
-      rtfloat high_y;
-      rtfloat high_z;
+      union {
+        vec3f low_v;
+        struct {
+          rtfloat low_x;
+          rtfloat low_y;
+          rtfloat low_z;
+        };
+      };
+
+      union {
+        vec3f high_v;
+        struct {
+          rtfloat high_x;
+          rtfloat high_y;
+          rtfloat high_z;
+        };
+      };
     };
   };
 };
+
+aa_box3f bound_transform(aa_box3f box, const matrix4f &trans);
+bool intersect(ray3f ray, aa_box3f box);
 
 
 

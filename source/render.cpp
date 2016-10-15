@@ -70,7 +70,7 @@ static color3f compute_shading(scene *s, scene_object *obj, vec3f point,
 
   for (light_source light : s->lights) {
     vec3f light_dir;
-    rtfloat light_dist;
+    rtfloat light_dist = 0;
     rtfloat falloff_factor = 1;
     if (light.type == light_type::directional) {
       light_dir = -light.dir;
