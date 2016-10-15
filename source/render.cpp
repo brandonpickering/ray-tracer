@@ -26,11 +26,10 @@ static ray_intersection trace_ray(scene *s, ray3f ray) {
   rtfloat invmagdir = 1 / magnitude(ray.dir);
   ray_intersection result = no_intersection(nullptr);
 
-  auto cands = candidates(s->object_tree, ray);
+  flat_list<scene_object *> cands = s->obj_structure->candidates(ray);
   for (scene_object *obj : cands) {
     ray_intersection inter = no_intersection(obj);
 
-    // TODO: On load, try to transform objects and leave their transforms as id
     if (obj->transform_id) {
       inter = obj->ray_test(ray);
 

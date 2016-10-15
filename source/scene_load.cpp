@@ -198,6 +198,8 @@ scene *scene_create(FILE *input, std::string filename) {
 void scene_destroy(scene *s) {
   if (s == nullptr) return;
 
+  delete s->obj_structure;
+
   for (scene_object *obj : s->objects)
     delete obj;
   delete s;

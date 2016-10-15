@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <string>
 
-#include "bound_tree.hpp"
 #include "common.hpp"
 #include "image.hpp"
 #include "scene.hpp"
@@ -13,6 +12,7 @@ static FILE *in_file = stdin;
 static FILE *out_file = stdout;
 static size_t img_width = 700, img_height = 700;
 static int sample_freq = 0;
+static int obj_struct = 0;
 
 
 static void read_arguments(int argc, char *argv[]) {
@@ -74,6 +74,23 @@ static void read_arguments(int argc, char *argv[]) {
       }
 
 
+    } else if (arg == "--structure" || arg == "-S") {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "Error: Expected linear or bound_tree after "
+                        "--structure flag\n");
+        exit(1);
+      }
+      std::string type = argv[++i];
+
+      if (type == "linear" || type == "l") obj_struct = 0;
+      else if (type == "bound_tree" || type == "bt") obj_struct = 1;
+      else {
+        fprintf(stderr, "Error: Invalid structure type. Valid types are "
+                        "'linear' and 'bound_tree'\n");
+        exit(1);
+      }
+
+
     } else if (arg[0] == '-') {
       fprintf(stderr, "Error: Unknown flag: %s\n", arg.c_str());
       exit(1);
@@ -110,7 +127,10 @@ int main(int argc, char *argv[]) {
   if (s == nullptr) exit(1);
 
 
-  s->object_tree = bound_tree_create(s);
+  if (obj_struct == 1)
+    s->obj_structure = object_bound_tree(s);
+  else
+    s->obj_structure = object_list(s);
 
 
   image_ostream *stream = open_ppm_stream(out_file, img_width, img_height);
@@ -120,9 +140,6 @@ int main(int argc, char *argv[]) {
   if (out_file != stdout)
     fclose(out_file);
   close(stream);
-
-
-  bound_tree_destroy(s->object_tree);
 
 
   scene_destroy(s);

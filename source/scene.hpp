@@ -4,9 +4,9 @@
 
 #include <vector>
 
-#include "bound_tree.hpp"
 #include "common.hpp"
 #include "image.hpp"
+#include "object_structure.hpp"
 
 
 struct scene_object;
@@ -84,7 +84,7 @@ struct scene {
   std::vector<light_source> lights;
   std::vector<scene_object *> objects;
 
-  bound_tree *object_tree;
+  object_structure *obj_structure;
 };
 
 

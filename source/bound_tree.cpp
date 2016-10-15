@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <vector>
 
-#include "bound_tree.hpp"
 #include "common.hpp"
 #include "scene.hpp"
 
@@ -12,10 +11,6 @@ struct bound_tree_node {
   
   aa_box3f bounding_box;
   std::vector<scene_object *> objects;
-};
-
-struct bound_tree {
-  bound_tree_node *root;
 };
 
 
@@ -58,7 +53,7 @@ static void bound_tree_node_destroy(bound_tree_node *node) {
 }
 
 
-static void split(bound_tree_node *node) {
+static void distribute(bound_tree_node *node) {
   if (node->objects.size() <= 3) return;
   aa_box3f box0 = node->bounding_box;
   
@@ -107,24 +102,10 @@ static void split(bound_tree_node *node) {
       node->children[k] = bound_tree_node_create(obj_part[k], node);
 
   if (node->children[0] != nullptr && node->children[1] != nullptr) {
-    split(node->children[0]);
-    split(node->children[1]);
+    distribute(node->children[0]);
+    distribute(node->children[1]);
   }
 }
-
-
-bound_tree *bound_tree_create(scene *s) {
-  bound_tree *tree = new bound_tree;
-  tree->root = bound_tree_node_create(s->objects);
-  split(tree->root);
-  return tree;
-}
-
-void bound_tree_destroy(bound_tree *tree) {
-  bound_tree_node_destroy(tree->root);
-  delete tree;
-}
-
 
 
 static void get_candidates(flat_list<scene_object *> *list,
@@ -136,8 +117,26 @@ static void get_candidates(flat_list<scene_object *> *list,
   get_candidates(list, node->children[1], ray);
 }
 
-flat_list<scene_object *> candidates(bound_tree *tree, ray3f ray) {
-  flat_list<scene_object *> result;
-  get_candidates(&result, tree->root, ray);
-  return result;
+
+
+struct bound_tree : object_structure {
+  bound_tree_node *root;
+
+  ~bound_tree() {
+    bound_tree_node_destroy(root);
+  }
+
+  flat_list<scene_object *> candidates(ray3f ray) {
+    flat_list<scene_object *> result;
+    get_candidates(&result, root, ray);
+    return result;
+  }
+};
+
+
+object_structure *object_bound_tree(scene *s) {
+  bound_tree *tree = new bound_tree;
+  tree->root = bound_tree_node_create(s->objects);
+  distribute(tree->root);
+  return tree;
 }
