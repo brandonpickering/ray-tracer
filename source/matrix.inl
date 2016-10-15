@@ -47,23 +47,10 @@ inline std::string str(const matrix4f &m) {
 
 
 inline rtfloat &matrix4f::operator()(int row, int col) {
-#ifdef DEBUG_MODE
-  static rtfloat default_var;
-  if (row < 0 || row >= 4 || col < 0 || col >= 4) {
-    fprintf(stderr, "Error: Matrix access out of bounds\n");
-    return default_var;
-  }
-#endif
   return data[row * 4 + col];
 }
 
 inline rtfloat matrix4f::operator()(int row, int col) const {
-#ifdef DEBUG_MODE
-  if (row < 0 || row >= 4 || col < 0 || col >= 4) {
-    fprintf(stderr, "Error: Matrix access out of bounds\n");
-    return 0;
-  }
-#endif
   return data[row * 4 + col];
 }
 
