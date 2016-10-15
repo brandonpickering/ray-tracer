@@ -163,29 +163,35 @@ inline matrix4f mat4_hscale(rtfloat x, rtfloat y, rtfloat z) {
 }
 
 inline matrix4f mat4_hrotate_x(rtfloat a) {
+  rtfloat s = (rtfloat) sin(a);
+  rtfloat c = (rtfloat) cos(a);
   return {{
-    1,      0,       0, 0,
-    0, cos(a), -sin(a), 0,
-    0, sin(a),  cos(a), 0,
-    0,      0,       0, 1,
+    1, 0,  0, 0,
+    0, c, -s, 0,
+    0, s,  c, 0,
+    0, 0,  0, 1,
   }};
 }
 
 inline matrix4f mat4_hrotate_y(rtfloat a) {
+  rtfloat s = (rtfloat) sin(a);
+  rtfloat c = (rtfloat) cos(a);
   return {{
-     cos(a), 0, sin(a), 0,
-          0, 1,      0, 0,
-    -sin(a), 0, cos(a), 0,
-          0, 0,      0, 1,
+     c, 0, s, 0,
+     0, 1, 0, 0,
+    -s, 0, c, 0,
+     0, 0, 0, 1,
   }};
 }
 
 inline matrix4f mat4_hrotate_z(rtfloat a) {
+  rtfloat s = (rtfloat) sin(a);
+  rtfloat c = (rtfloat) cos(a);
   return {{
-    cos(a), -sin(a), 0, 0,
-    sin(a),  cos(a), 0, 0,
-         0,       0, 1, 0,
-         0,       0, 0, 1,
+    c, -s, 0, 0,
+    s,  c, 0, 0,
+    0,  0, 1, 0,
+    0,  0, 0, 1,
   }};
 }
 
@@ -197,9 +203,11 @@ inline matrix4f mat4_hrotate(vec3f axis, rtfloat a) {
     -r.y,  r.x,    0, 0,
        0,    0,    0, 1,
   }};
-  matrix4f s = mat4_hscale(sin(a), sin(a), sin(a));
-  matrix4f c = mat4_hscale(1-cos(a), 1-cos(a), 1-cos(a));
-  matrix4f result = rx*s + mat4_identity() + rx*rx*c;
+  rtfloat s = (rtfloat) sin(a);
+  rtfloat c = (rtfloat) cos(a);
+  matrix4f sm = mat4_hscale(s, s, s);
+  matrix4f cm = mat4_hscale(1-c, 1-c, 1-c);
+  matrix4f result = rx*sm + mat4_identity() + rx*rx*cm;
   result(3,3) = 1;
   return result;
 }

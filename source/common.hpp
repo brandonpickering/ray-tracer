@@ -125,6 +125,30 @@ matrix4f mat4_htranslate(vec3f v);
 
 
 
+/* Axis aligned box in 3-dim rtfloat space */
+
+struct aa_box3f {
+  union {
+    vec3f low_v;
+    struct {
+      rtfloat low_x;
+      rtfloat low_y;
+      rtfloat low_z;
+    };
+  };
+
+  union {
+    vec3f high_v;
+    struct {
+      rtfloat high_x;
+      rtfloat high_y;
+      rtfloat high_z;
+    };
+  };
+};
+
+
+
 #include "utils.inl"
 #include "vector.inl"
 #include "matrix.inl"
