@@ -35,6 +35,12 @@ ray_intersection sphere_object::ray_test(ray3f ray) {
 }
 
 
+aa_box3f sphere_object::bounding_box() {
+  vec3f r = { radius, radius, radius };
+  return { center - r, center + r };
+}
+
+
 
 ray_intersection triangle_object::ray_test(ray3f ray) {
   vec3f v1 = vertices[0], v2 = vertices[1], v3 = vertices[2];
@@ -67,6 +73,26 @@ ray_intersection triangle_object::ray_test(ray3f ray) {
     return no_intersection(this);
 
   return intersection(this, s, n);
+}
+
+
+static inline rtfloat min3(rtfloat a, rtfloat b, rtfloat c) {
+  return std::min(a, std::min(b, c));
+}
+
+static inline rtfloat max3(rtfloat a, rtfloat b, rtfloat c) {
+  return std::max(a, std::max(b, c));
+}
+
+aa_box3f triangle_object::bounding_box() {
+  aa_box3f box;
+  box.low_x  = min3(vertices[0].x, vertices[1].x, vertices[2].x);
+  box.low_y  = min3(vertices[0].y, vertices[1].y, vertices[2].y);
+  box.low_z  = min3(vertices[0].z, vertices[1].z, vertices[2].z);
+  box.high_x = max3(vertices[0].x, vertices[1].x, vertices[2].x);
+  box.high_y = max3(vertices[0].y, vertices[1].y, vertices[2].y);
+  box.high_z = max3(vertices[0].z, vertices[1].z, vertices[2].z);
+  return box;
 }
 
 

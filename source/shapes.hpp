@@ -11,6 +11,7 @@ struct sphere_object : scene_object {
   rtfloat radius;
 
   virtual ray_intersection ray_test(ray3f ray);
+  virtual aa_box3f bounding_box();
 };
 
 
@@ -18,6 +19,7 @@ struct triangle_object : scene_object {
   vec3f vertices[3];
 
   virtual ray_intersection ray_test(ray3f ray);
+  virtual aa_box3f bounding_box();
   
   virtual bool apply_affine(const matrix4f &trans);
 };
