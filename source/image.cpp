@@ -41,6 +41,7 @@ image_ostream *open_buffer_stream(color3f *buffer, size_t width,
 
 image_ostream *open_ppm_stream(FILE *file, size_t width, size_t height) {
   fprintf(file, "P6 %zu %zu 255\n", width, height);
+  fflush(file);
 
   image_ostream *stream = new image_ostream;
   stream->width = width;
@@ -54,6 +55,7 @@ image_ostream *open_ppm_stream(FILE *file, size_t width, size_t height) {
     fputc(r, file);
     fputc(g, file);
     fputc(b, file);
+    fflush(file);
     next(stream);
   };
 
