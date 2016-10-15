@@ -166,6 +166,8 @@ struct aa_box3f {
 
 aa_box3f bound_transform(aa_box3f box, const matrix4f &trans);
 bool intersect(ray3f ray, aa_box3f box);
+bool intersect(aa_box3f box1, aa_box3f box2);
+void expand(aa_box3f *box1, aa_box3f box2);
 
 
 

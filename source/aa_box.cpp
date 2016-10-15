@@ -53,3 +53,20 @@ bool intersect(ray3f ray, aa_box3f box) {
 
   return false;
 }
+
+
+bool intersect(aa_box3f box1, aa_box3f box2) {
+  for (int k = 0; k < 3; k++) {
+    if (box1.high_v.data[k] < box2.low_v.data[k]) return false;
+    if (box2.high_v.data[k] < box1.low_v.data[k]) return false;
+  }
+  return true;
+}
+
+
+void expand(aa_box3f *box1, aa_box3f box2) {
+  for (int k = 0; k < 3; k++) {
+    box1->low_v.data[k] = std::min(box1->low_v.data[k], box2.low_v.data[k]);
+    box1->high_v.data[k] = std::max(box1->high_v.data[k], box2.high_v.data[k]);
+  }
+}

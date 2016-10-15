@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <string>
 
+#include "bound_tree.hpp"
 #include "common.hpp"
 #include "image.hpp"
 #include "scene.hpp"
@@ -109,6 +110,9 @@ int main(int argc, char *argv[]) {
   if (s == nullptr) exit(1);
 
 
+  s->object_tree = bound_tree_create(s);
+
+
   image_ostream *stream = open_ppm_stream(out_file, img_width, img_height);
 
   scene_render(s, stream, sample_freq);
@@ -116,6 +120,9 @@ int main(int argc, char *argv[]) {
   if (out_file != stdout)
     fclose(out_file);
   close(stream);
+
+
+  bound_tree_destroy(s->object_tree);
 
 
   scene_destroy(s);
