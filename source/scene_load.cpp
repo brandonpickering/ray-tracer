@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "common.hpp"
+#include "obj_geometry.hpp"
 #include "parse.hpp"
 #include "scene.hpp"
 #include "shapes.hpp"
@@ -146,6 +147,20 @@ static void exec_command(input_env *env, string line) {
     triangle->vertices[2] = parse_vec3f(&env->penv, &line);
     add_scene_object(env, triangle);
 
+  } else if (cmd == "obj") {
+    // TODO: Should filename be relative to input file?
+    std::string filename = parse_string(&env->penv, &line);
+    obj_geometry *obj = obj_read(filename.c_str());
+    for (obj_triangle tri : obj->triangles) {
+      triangle_object *triangle = new triangle_object;
+      for (int i = 0; i < 3; i++) {
+        size_t index = tri.vertices[i].vertex_index;
+        triangle->vertices[i] = obj->vertices[index];
+      }
+      add_scene_object(env, triangle);
+    }
+    obj_destroy(obj);
+
   } else {
     parse_warning(&env->penv, "Unsupported command '%s'", cmd.c_str());
     return;
@@ -169,12 +184,12 @@ scene *scene_create(FILE *input, std::string filename) {
   while ((line = read_line(&env.penv, input)) != "")
     exec_command(&env, line);
 
-  if (env.default_cam)
-    fprintf(stderr, "Warning: Using default camera\n");
   if (env.penv.error) {
     scene_destroy(env.s);
     return nullptr;
   }
+  if (env.default_cam)
+    fprintf(stderr, "Warning: Using default camera\n");
 
   return env.s;
 }

@@ -109,6 +109,8 @@ string parse_string(parse_env *env, string *line) {
   while (i < line->size() && (*line)[i] != '"') result += (*line)[i++];
   if (i == line->size())
     parse_error(env, "Expected closing quote");
+  else
+    i++;
   
   line->erase(0, i);
   return result;
