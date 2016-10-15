@@ -38,8 +38,8 @@ static void add_scene_object(input_env *env, scene_object *obj) {
 
   if (obj->apply_affine(env->transform_ow)) {
     obj->transform_id = true;
-    obj->transform_wo = env->transform_wo;
-    obj->transform_ow = env->transform_ow;
+    obj->transform_wo = mat4_identity();
+    obj->transform_ow = mat4_identity();
   } else {
     obj->transform_id = env->identity;
     obj->transform_wo = env->transform_wo;

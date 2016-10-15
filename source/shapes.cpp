@@ -48,13 +48,14 @@ ray_intersection triangle_object::ray_test(ray3f ray) {
 
   rtfloat t1 = rtfloat_inf, t2 = rtfloat_inf;
   rtfloat det;
-  if ((det = w1.x*w2.y - w2.x*w1.y) != 0) {
+  static const rtfloat tolerance = 0.001;
+  if (std::abs(det = w1.x*w2.y - w2.x*w1.y) >= tolerance) {
     t1 = (w2.y*rp.x - w2.x*rp.y) / det;
     t2 = (w1.x*rp.y - w1.y*rp.x) / det;
-  } else if ((det = w1.x*w2.z - w2.x*w1.z) != 0) {
+  } else if (std::abs(det = w1.x*w2.z - w2.x*w1.z) >= tolerance) {
     t1 = (w2.z*rp.x - w2.x*rp.z) / det;
     t2 = (w1.x*rp.z - w1.z*rp.x) / det;
-  } else if ((det = w1.y*w2.z - w2.y*w1.z) != 0) {
+  } else if (std::abs(det = w1.y*w2.z - w2.y*w1.z) >= tolerance) {
     t1 = (w2.z*rp.y - w2.y*rp.z) / det;
     t2 = (w1.y*rp.z - w1.z*rp.y) / det;
   } else {
