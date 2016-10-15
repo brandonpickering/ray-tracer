@@ -88,8 +88,7 @@ struct scene {
 scene *scene_create(FILE *input, std::string filename);
 void scene_destroy(scene *);
 
-void scene_render(scene *, size_t width, size_t height, int sample_freq,
-                  image_output_stream write_pixel);
+void scene_render(scene *, image_ostream *, int sample_freq = 0);
 
 
 

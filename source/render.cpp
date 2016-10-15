@@ -167,34 +167,33 @@ static color3f sample_color(scene *s, vec3f ll, vec3f lr, vec3f ul, vec3f ur,
 }
 
 
-void scene_render(scene *s, size_t width, size_t height, int sample_freq,
-                  image_output_stream write_pixel) {
+void scene_render(scene *s, image_ostream *stream, int sample_freq) {
   vec3f ll = s->camera.lower_left;
   vec3f lr = s->camera.lower_right;
   vec3f ul = s->camera.upper_left;
   vec3f ur = s->camera.upper_right;
 
-  for (size_t i = 0; i < height; i++) {
-    for (size_t j = 0; j < width; j++) {
-      size_t i0 = height - 1 - i;
-      size_t j0 = j;
-      size_t i1 = i0 + 1;
-      size_t j1 = j0 + 1;
+  while (!done(stream)) {
+    size_t i = stream->cur_row;
+    size_t j = stream->cur_col;
 
-      rtfloat u0 = (rtfloat) j0 / width;
-      rtfloat v0 = (rtfloat) i0 / height;
-      rtfloat u1 = (rtfloat) j1 / width;
-      rtfloat v1 = (rtfloat) i1 / height;
-    
-      vec3f pll = bilin(ll, lr, ul, ur, u0, v0);
-      vec3f plr = bilin(ll, lr, ul, ur, u1, v0);
-      vec3f pul = bilin(ll, lr, ul, ur, u0, v1);
-      vec3f pur = bilin(ll, lr, ul, ur, u1, v1);
+    size_t i0 = stream->height - 1 - i;
+    size_t j0 = j;
+    size_t i1 = i0 + 1;
+    size_t j1 = j0 + 1;
 
-      // TODO: Pick bounce constant better
-      // TODO: Pick sample grid size better
-      write_pixel(sample_color(s, pll, plr, pul, pur, 
-                    s->camera.eye, sample_freq, 5));
-    }
+    rtfloat u0 = (rtfloat) j0 / stream->width;
+    rtfloat v0 = (rtfloat) i0 / stream->height;
+    rtfloat u1 = (rtfloat) j1 / stream->width;
+    rtfloat v1 = (rtfloat) i1 / stream->height;
+  
+    vec3f pll = bilin(ll, lr, ul, ur, u0, v0);
+    vec3f plr = bilin(ll, lr, ul, ur, u1, v0);
+    vec3f pul = bilin(ll, lr, ul, ur, u0, v1);
+    vec3f pur = bilin(ll, lr, ul, ur, u1, v1);
+
+    // TODO: Pick bounce constant better
+    stream << sample_color(s, pll, plr, pul, pur, s->camera.eye, 
+                            sample_freq, 5);
   }
 }

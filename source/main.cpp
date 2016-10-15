@@ -108,11 +108,15 @@ int main(int argc, char *argv[]) {
     fclose(in_file);
   if (s == nullptr) exit(1);
 
-  image_output_stream write_pixel = ppm_stream(out_file, img_width, img_height);
-  scene_render(s, img_width, img_height, sample_freq, write_pixel);
+
+  image_ostream *stream = open_ppm_stream(out_file, img_width, img_height);
+
+  scene_render(s, stream, sample_freq);
 
   if (out_file != stdout)
     fclose(out_file);
+  close(stream);
+
 
   scene_destroy(s);
   return 0;
