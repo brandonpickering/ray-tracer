@@ -22,7 +22,8 @@ struct input_env {
   bool default_cam = true;
 
   bool default_mat = true;
-  object_material material = { {0,0,0}, {0,0,0}, {0,0,0}, 1, {0,0,0} };
+  object_material material = { vec(0,0,0), vec(0,0,0), 
+                                vec(0,0,0), 1, vec(0,0,0) };
 
   bool identity = true;
   matrix4f transform_wo = mat4_identity();
