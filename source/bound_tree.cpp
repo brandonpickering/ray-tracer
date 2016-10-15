@@ -59,21 +59,34 @@ static void bound_tree_node_destroy(bound_tree_node *node) {
 
 
 static void split(bound_tree_node *node) {
-  // TODO: Uncomment
-  //if (node->objects.size() <= 3) return;
+  if (node->objects.size() <= 3) return;
   aa_box3f box0 = node->bounding_box;
   
   int split_axis;
   rtfloat split_offset;
-  // TODO: Pick axis better, maybe use median or something
-  split_axis = rand() % 3;
+
+  /* Select axis */
+  // TODO: Pick axis better?
+  rtfloat maxlen = -rtfloat_inf;
+  for (int a = 0; a < 3; a++) {
+    rtfloat len = box0.high_v.data[a] - box0.low_v.data[a];
+    if (len > maxlen) {
+      maxlen = len;
+      split_axis = a;
+    }
+  }
+
+  /* Select position on axis to split */
+  // TODO: Pick offset better?
   split_offset = (box0.low_v.data[split_axis] + 
                   box0.high_v.data[split_axis]) * 0.5;
+
 
   aa_box3f box[2] = { box0, box0 };
   box[0].high_v.data[split_axis] = split_offset;
   box[1].low_v.data[split_axis] = split_offset;
   
+  /* Partition objects */
   std::vector<scene_object *> obj_part[2];
   for (scene_object *obj : node->objects) {
     aa_box3f obox = bound_transform(obj->bounding_box(), obj->transform_ow);
@@ -88,6 +101,7 @@ static void split(bound_tree_node *node) {
 
   node->objects.clear();
 
+  /* Construct children */
   for (int k = 0; k < 2; k++)
     if (!obj_part[k].empty())
       node->children[k] = bound_tree_node_create(obj_part[k], node);
@@ -113,52 +127,17 @@ void bound_tree_destroy(bound_tree *tree) {
 
 
 
-static std::vector<scene_object *> candidates(bound_tree_node *node, 
-                                              ray3f ray) {
-  if (node == nullptr || !intersect(ray, node->bounding_box))
-    return std::vector<scene_object *>();
+static void get_candidates(flat_list<scene_object *> *list,
+                            bound_tree_node *node, ray3f ray) {
+  if (node == nullptr || !intersect(ray, node->bounding_box)) return;
 
-  std::vector<scene_object *> result = node->objects;
-  std::vector<scene_object *> rchild0 = candidates(node->children[0], ray);
-  std::vector<scene_object *> rchild1 = candidates(node->children[1], ray);
-  result.insert(result.end(), rchild0.begin(), rchild0.end());
-  result.insert(result.end(), rchild1.begin(), rchild1.end());
+  if (!node->objects.empty()) list->extend(&node->objects);
+  get_candidates(list, node->children[0], ray);
+  get_candidates(list, node->children[1], ray);
+}
 
+flat_list<scene_object *> candidates(bound_tree *tree, ray3f ray) {
+  flat_list<scene_object *> result;
+  get_candidates(&result, tree->root, ray);
   return result;
-}
-
-std::vector<scene_object *> candidates(bound_tree *tree, ray3f ray) {
-  return candidates(tree->root, ray);
-}
-
-
-
-// TODO: Remove below this line
-
-static void print_box(aa_box3f box) {
-  for (int i = 0; i < 6; i++) {
-    fprintf(stderr, "%f ", ((rtfloat *) &box)[i]);
-  }
-  fprintf(stderr, "\n");
-}
-
-static void print_node(bound_tree_node *node, int depth=0) {
-  if (node == nullptr) return;
-  for (int i = 0; i < depth; i++) fprintf(stderr, " ");
-  fprintf(stderr, "%zu\t: ", node->objects.size());
-  print_box(node->bounding_box);
-  print_node(node->children[0], depth+1);
-  print_node(node->children[1], depth+1);
-}
-
-static size_t max_size(bound_tree_node *node) {
-  if (node == nullptr) return 0;
-  size_t max_n = node->objects.size();
-  max_n = std::max(max_n, max_size(node->children[0]));
-  max_n = std::max(max_n, max_size(node->children[1]));
-  return max_n;
-}
-
-void test_stuff(bound_tree *tree) {
-  fprintf(stderr, "Tree calculated: %zu\n", max_size(tree->root));
 }

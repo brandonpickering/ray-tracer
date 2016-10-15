@@ -14,7 +14,7 @@ struct bound_tree;
 bound_tree *bound_tree_create(scene *);
 void bound_tree_destroy(bound_tree *);
 
-std::vector<scene_object *> candidates(bound_tree *, ray3f);
+flat_list<scene_object *> candidates(bound_tree *, ray3f);
 
 
 #endif

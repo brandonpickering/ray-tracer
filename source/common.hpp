@@ -24,6 +24,41 @@ T clamp(T x, T lo, T hi);
 
 
 
+/* Pseudo-container containing references to a sequence of iterables,
+ * presenting them as one long list */
+
+template <typename T>
+class flat_list {
+public:
+  struct iterator {
+    bool operator!=(iterator &it) { return subiterator != it.subiterator; }
+    T operator*() { return *subiterator; }
+    iterator &operator++() {
+      if (++subiterator == (*container)->end())
+        subiterator = (*++container)->begin();
+      return *this;
+    }
+
+    typename std::vector<std::vector<T> *>::iterator container;
+    typename std::vector<T>::iterator subiterator;
+  };
+
+  flat_list() { containers.push_back(&end_container); };
+
+  iterator begin() { return {containers.begin(), containers[0]->begin()}; }
+  iterator end() { return {containers.end()-1, end_container.begin()}; }
+
+  void extend(std::vector<T> *v) {
+    if (!v->empty()) containers.insert(containers.end()-1, v);
+  }
+
+private:
+  std::vector<T> end_container;
+  std::vector<std::vector<T> *> containers;
+};
+
+
+
 /* Vector in 3-dim rtfloat space */
 
 struct vec3f {

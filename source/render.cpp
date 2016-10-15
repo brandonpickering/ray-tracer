@@ -26,7 +26,7 @@ static ray_intersection trace_ray(scene *s, ray3f ray) {
   rtfloat invmagdir = 1 / magnitude(ray.dir);
   ray_intersection result = no_intersection(nullptr);
 
-  std::vector<scene_object *> cands = candidates(s->object_tree, ray);
+  auto cands = candidates(s->object_tree, ray);
   for (scene_object *obj : cands) {
     ray_intersection inter = no_intersection(obj);
 
