@@ -26,4 +26,10 @@ T clamp(T x, T lo, T hi) {
 }
 
 
+inline std::string get_directory(std::string filename) {
+  size_t split = filename.find_last_of("/\\");
+  return filename.substr(0, split+1);
+}
+
+
 #endif

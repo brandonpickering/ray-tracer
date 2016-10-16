@@ -149,9 +149,10 @@ static void exec_command(input_env *env, string line) {
     add_scene_object(env, triangle);
 
   } else if (cmd == "obj") {
-    // TODO: Should filename be relative to input file?
     std::string filename = parse_string(&env->penv, &line);
+    filename = env->penv.directory + filename;
     obj_geometry *obj = obj_read(filename.c_str());
+
     for (obj_triangle tri : obj->triangles) {
       triangle_object *triangle = new triangle_object;
       for (int i = 0; i < 3; i++) {

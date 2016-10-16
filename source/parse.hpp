@@ -12,6 +12,7 @@ struct parse_env {
   int line_num;
   bool error;
   std::string filename;
+  std::string directory;
 };
 
 parse_env parse_env_create(std::string filename);

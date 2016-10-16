@@ -22,6 +22,8 @@ std::string stringf(const char *format, T... args);
 template <typename T>
 T clamp(T x, T lo, T hi);
 
+std::string get_directory(std::string filename);
+
 
 
 /* Pseudo-container containing references to a sequence of iterables,

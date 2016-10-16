@@ -2,13 +2,14 @@
 #include <cstdio>
 #include <string>
 
+#include "common.hpp"
 #include "parse.hpp"
 
 using std::string;
 
 
 parse_env parse_env_create(std::string filename) {
-  return {0, false, filename};
+  return {0, false, filename, get_directory(filename)};
 }
 
 
