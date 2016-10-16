@@ -1,0 +1,21 @@
+Brandon Pickering
+Unix
+cs184-abq
+
+
+Command line flags:
+
+  --freq|-f N
+      For each pixel, supersample using an NxN jittered grid.
+      N=0 disables supersampling, and is the default.
+
+  --output|-o file
+      Specify output file. By default, sends to stdout.
+
+  --size|-s width height
+      Specify the size of the output image. Default is 700x700.
+
+  --structure|-S str
+      If str is linear|l, don't use any spatial partitioning.
+      If str is bound_tree|bt, use a bounding volume hierarchy.
+      Default is linear.

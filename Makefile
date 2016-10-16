@@ -7,8 +7,8 @@ OBJECTS=$(SOURCES:$(SOURCEDIR)/%.cpp=$(BUILDDIR)/%.o)
 EXEC=as2
 
 CC=g++
-CFLAGS=-Wall -Wextra -std=c++11 -O0
-LDFLAGS=-O0
+CFLAGS=-Wall -Wextra -std=c++11 -O3
+LDFLAGS=-O3
 
 
 all: $(EXEC)
