@@ -9,6 +9,42 @@
 using std::string;
 
 
+static void calculate_normals(obj_geometry *obj) {
+  static const rtfloat smooth_threshold = 0.5;
+  
+  for (obj_triangle &tri : obj->triangles) {
+    vec3f v1 = obj->vertices[tri.vertices[0].vertex_index];
+    vec3f v2 = obj->vertices[tri.vertices[1].vertex_index];
+    vec3f v3 = obj->vertices[tri.vertices[2].vertex_index];
+    tri.face_normal = normalize(cross(v1 - v3, v2 - v3));
+  }
+
+  for (obj_triangle &tri : obj->triangles) {
+    for (obj_vertex &vert : tri.vertices) {
+      vec3f v = obj->vertices[vert.vertex_index];
+
+      vec3f average_normal = vec(0,0,0);
+      size_t num_tris = 0;
+      for (obj_triangle &tri2 : obj->triangles) {
+        if (dot(tri.face_normal, tri2.face_normal) < smooth_threshold)
+          continue;
+
+        for (obj_vertex &vert2 : tri2.vertices) {
+          vec3f v2 = obj->vertices[vert2.vertex_index];
+          if (magnitude(v - v2) < 0.0001) {
+            average_normal = average_normal + tri2.face_normal;
+            num_tris += 1;
+          }
+        }
+      }
+      average_normal = normalize(average_normal / num_tris);
+
+      vert.normal = average_normal;
+    }
+  }
+}
+
+
 struct obj_env {
   parse_env penv;
 
@@ -44,7 +80,7 @@ static obj_vertex parse_vertex_data(obj_env *env, std::string *line) {
     line->erase(0, 1);
 
     parse_warning(&env->penv, "Vertex normals are currently ignored");
-    v.normal_index = parse_ref_num(env, line);
+    //v.normal_index = parse_ref_num(env, line);
   }
 
   return v;
@@ -58,7 +94,11 @@ static void parse_face(obj_env *env, std::string *line) {
 
   do {
     obj_vertex v2 = parse_vertex_data(env, line);
-    env->obj->triangles.push_back({{v0, v1, v2}});
+    obj_triangle tri;
+    tri.vertices[0] = v0;
+    tri.vertices[1] = v1;
+    tri.vertices[2] = v2;
+    env->obj->triangles.push_back(tri);
     v1 = v2;
 
     while (isspace((*line)[0])) line->erase(0, 1);
@@ -98,7 +138,7 @@ obj_geometry *obj_read(std::string filename) {
   env.obj = new obj_geometry;
 
   env.obj->vertices.push_back(vec(0,0,0));
-  env.obj->normals.push_back(vec(0,0,0));
+  //env.obj->normals.push_back(vec(0,0,0));
 
   std::string line;
   while ((line = read_line(&env.penv, file)) != "")
@@ -113,6 +153,7 @@ obj_geometry *obj_read(std::string filename) {
     return nullptr;
   }
 
+  calculate_normals(env.obj);
   return env.obj;
 }
 

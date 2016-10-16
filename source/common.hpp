@@ -160,6 +160,8 @@ ray3f operator*(const matrix4f &, ray3f);
 rtfloat det3(const matrix4f &);
 matrix4f transpose(const matrix4f &);
 
+vec3f trans_normal(vec3f normal, matrix4f trans, matrix4f trans_inv);
+
 matrix4f mat4_identity();
 matrix4f mat4_zero();
 matrix4f mat4_hzero();

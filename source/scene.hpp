@@ -41,7 +41,7 @@ struct scene_object {
   virtual ray_intersection ray_test(ray3f ray) = 0;
   virtual aa_box3f bounding_box() = 0;
 
-  virtual bool apply_affine(const matrix4f &) { return false; }
+  virtual bool apply_affine(const matrix4f &trans, const matrix4f &inv);
 };
 
 

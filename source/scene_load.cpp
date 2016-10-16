@@ -14,6 +14,11 @@ using std::string;
 using std::vector;
 
 
+bool scene_object::apply_affine(const matrix4f &, const matrix4f &) {
+  return false;
+}
+
+
 struct input_env {
   parse_env penv;
 
@@ -37,7 +42,7 @@ static void add_scene_object(input_env *env, scene_object *obj) {
 
   obj->material = env->material;
 
-  if (obj->apply_affine(env->transform_ow)) {
+  if (obj->apply_affine(env->transform_ow, env->transform_wo)) {
     obj->transform_id = true;
     obj->transform_wo = mat4_identity();
     obj->transform_ow = mat4_identity();
@@ -146,6 +151,7 @@ static void exec_command(input_env *env, string line) {
     triangle->vertices[0] = parse_vec3f(&env->penv, &line);
     triangle->vertices[1] = parse_vec3f(&env->penv, &line);
     triangle->vertices[2] = parse_vec3f(&env->penv, &line);
+    triangle->default_normals();
     add_scene_object(env, triangle);
 
   } else if (cmd == "obj") {
@@ -158,6 +164,7 @@ static void exec_command(input_env *env, string line) {
       for (int i = 0; i < 3; i++) {
         size_t index = tri.vertices[i].vertex_index;
         triangle->vertices[i] = obj->vertices[index];
+        triangle->normals[i] = tri.vertices[i].normal;
       }
       add_scene_object(env, triangle);
     }

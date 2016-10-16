@@ -5,7 +5,6 @@
 #include "shapes.hpp"
 
 
-
 ray_intersection sphere_object::ray_test(ray3f ray) {
   vec3f p = ray.start - center;
   vec3f d = ray.dir;
@@ -42,6 +41,13 @@ aa_box3f sphere_object::bounding_box() {
 
 
 
+void triangle_object::default_normals() {
+  vec3f n = normalize(cross(vertices[0] - vertices[2], 
+                            vertices[1] - vertices[2]));
+  normals[0] = normals[1] = normals[2] = n;
+}
+
+
 ray_intersection triangle_object::ray_test(ray3f ray) {
   vec3f v1 = vertices[0], v2 = vertices[1], v3 = vertices[2];
   vec3f w1 = v1 - v3, w2 = v2 - v3;
@@ -72,7 +78,9 @@ ray_intersection triangle_object::ray_test(ray3f ray) {
   if (t1 < 0 || t1 > 1 || t2 < 0 || t2 > 1 || t1+t2 > 1)
     return no_intersection(this);
 
-  return intersection(this, s, n);
+  vec3f normal = t1*normals[0] + t2*normals[1] + (1-t1-t2)*normals[2];
+  normal = normalize(normal);
+  return intersection(this, s, normal);
 }
 
 
@@ -86,18 +94,21 @@ static inline rtfloat max3(rtfloat a, rtfloat b, rtfloat c) {
 
 aa_box3f triangle_object::bounding_box() {
   aa_box3f box;
-  box.low_x  = min3(vertices[0].x, vertices[1].x, vertices[2].x);
-  box.low_y  = min3(vertices[0].y, vertices[1].y, vertices[2].y);
-  box.low_z  = min3(vertices[0].z, vertices[1].z, vertices[2].z);
-  box.high_x = max3(vertices[0].x, vertices[1].x, vertices[2].x);
-  box.high_y = max3(vertices[0].y, vertices[1].y, vertices[2].y);
-  box.high_z = max3(vertices[0].z, vertices[1].z, vertices[2].z);
+  for (int k = 0; k < 3; k++) {
+    box.low_v.data[k] = min3(vertices[0].data[k], vertices[1].data[k],
+                              vertices[2].data[k]);
+    box.high_v.data[k] = max3(vertices[0].data[k], vertices[1].data[k],
+                              vertices[2].data[k]);
+  }
   return box;
 }
 
 
-bool triangle_object::apply_affine(const matrix4f &trans) {
+bool triangle_object::apply_affine(const matrix4f &trans, 
+                                    const matrix4f &inv) {
   for (int i = 0; i < 3; i++)
     vertices[i] = project(trans * hpoint(vertices[i]));
+  for (int i = 0; i < 3; i++)
+    normals[i] = trans_normal(normals[i], trans, inv);
   return true;
 }

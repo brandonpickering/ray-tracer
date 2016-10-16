@@ -6,12 +6,6 @@
 static color3f trace_color(scene *s, ray3f ray, int bounces);
 
 
-static vec3f trans_normal(vec3f normal, matrix4f trans, matrix4f trans_inv) {
-  vec3f result = project(transpose(trans_inv) * hvec(normal));
-  return normalize(det3(trans) * result);
-}
-
-
 ray_intersection intersection(scene_object *obj, rtfloat dist, vec3f normal) {
   return {dist, normal, obj};
 }
