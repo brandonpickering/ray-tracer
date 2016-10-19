@@ -33,15 +33,13 @@ ray_intersection no_intersection(scene_object *obj);
 struct scene_object {
   object_material material;
 
-  bool transform_id;
-  matrix4f transform_wo; // world to object space
-  matrix4f transform_ow; // object space to world
+  transform3f transform_ow;
 
   virtual ~scene_object() {}
   virtual ray_intersection ray_test(ray3f ray) = 0;
   virtual aa_box3f bounding_box() = 0;
 
-  virtual bool apply_affine(const matrix4f &trans, const matrix4f &inv);
+  virtual bool apply_affine(const transform3f &) { return false; }
 };
 
 

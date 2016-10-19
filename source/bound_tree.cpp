@@ -21,7 +21,8 @@ static void update_bounding_box(bound_tree_node *node) {
   };
 
   for (scene_object *obj : node->objects) {
-    aa_box3f box = bound_transform(obj->bounding_box(), obj->transform_ow);
+    aa_box3f box = bound_transform(obj->bounding_box(),
+                                    obj->transform_ow.matrix);
     expand(&node->bounding_box, box);
   }
 
@@ -84,7 +85,8 @@ static void distribute(bound_tree_node *node) {
   /* Partition objects */
   std::vector<scene_object *> obj_part[2];
   for (scene_object *obj : node->objects) {
-    aa_box3f obox = bound_transform(obj->bounding_box(), obj->transform_ow);
+    aa_box3f obox = bound_transform(obj->bounding_box(), 
+                                    obj->transform_ow.matrix);
 
     int chk = obj_part[0].size() < obj_part[1].size() ? 0 : 1;
     

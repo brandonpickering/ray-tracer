@@ -100,12 +100,6 @@ inline matrix4f transpose(const matrix4f &m) {
 }
 
 
-inline vec3f trans_normal(vec3f normal, matrix4f trans, matrix4f trans_inv) {
-  vec3f result = project(transpose(trans_inv) * hvec(normal));
-  return normalize(det3(trans) * result);
-}
-
-
 inline matrix4f mat4_identity() {
   return {{
     1, 0, 0, 0,

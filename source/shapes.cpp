@@ -104,11 +104,10 @@ aa_box3f triangle_object::bounding_box() {
 }
 
 
-bool triangle_object::apply_affine(const matrix4f &trans, 
-                                    const matrix4f &inv) {
+bool triangle_object::apply_affine(const transform3f &trans) {
   for (int i = 0; i < 3; i++)
     vertices[i] = project(trans * hpoint(vertices[i]));
   for (int i = 0; i < 3; i++)
-    normals[i] = trans_normal(normals[i], trans, inv);
+    normals[i] = trans_normal(trans, normals[i]);
   return true;
 }

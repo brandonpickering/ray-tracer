@@ -3,6 +3,10 @@ Unix
 cs184-abq
 
 
+To build:
+  make
+
+
 Command line flags:
 
   --freq|-f N
@@ -17,5 +21,5 @@ Command line flags:
 
   --structure|-S str
       If str is linear|l, don't use any spatial partitioning.
-      If str is bound_tree|bt, use a bounding volume hierarchy.
+      If str is bvh, use a bounding volume hierarchy.
       Default is linear.

@@ -76,17 +76,17 @@ static void read_arguments(int argc, char *argv[]) {
 
     } else if (arg == "--structure" || arg == "-S") {
       if (i + 1 >= argc) {
-        fprintf(stderr, "Error: Expected linear or bound_tree after "
+        fprintf(stderr, "Error: Expected structure type after "
                         "--structure flag\n");
         exit(1);
       }
       std::string type = argv[++i];
 
       if (type == "linear" || type == "l") obj_struct = 0;
-      else if (type == "bound_tree" || type == "bt") obj_struct = 1;
+      else if (type == "bvh") obj_struct = 1;
       else {
         fprintf(stderr, "Error: Invalid structure type. Valid types are "
-                        "'linear' and 'bound_tree'\n");
+                        "'linear' and 'bvh'\n");
         exit(1);
       }
 

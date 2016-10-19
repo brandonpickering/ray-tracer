@@ -14,11 +14,6 @@ using std::string;
 using std::vector;
 
 
-bool scene_object::apply_affine(const matrix4f &, const matrix4f &) {
-  return false;
-}
-
-
 struct input_env {
   parse_env penv;
 
@@ -30,9 +25,7 @@ struct input_env {
   object_material material = { vec(0,0,0), vec(0,0,0), 
                                 vec(0,0,0), 1, vec(0,0,0) };
 
-  bool identity = true;
-  matrix4f transform_wo = mat4_identity();
-  matrix4f transform_ow = mat4_identity();
+  transform3f transform_ow;
 };
 
 
@@ -42,15 +35,10 @@ static void add_scene_object(input_env *env, scene_object *obj) {
 
   obj->material = env->material;
 
-  if (obj->apply_affine(env->transform_ow, env->transform_wo)) {
-    obj->transform_id = true;
-    obj->transform_wo = mat4_identity();
-    obj->transform_ow = mat4_identity();
-  } else {
-    obj->transform_id = env->identity;
-    obj->transform_wo = env->transform_wo;
+  if (obj->apply_affine(env->transform_ow))
+    obj->transform_ow = trans3_identity();
+  else
     obj->transform_ow = env->transform_ow;
-  }
 
   env->s->objects.push_back(obj);
 };
@@ -60,7 +48,7 @@ static void exec_command(input_env *env, string line) {
   string cmd = parse_cmd(&env->penv, &line);
 
   if (cmd == "cam") {
-    if (!env->identity)
+    if (!env->transform_ow.identity)
       parse_warning(&env->penv, "Transformations do not currently "
                                 "apply to cameras");
     env->s->camera.eye = parse_vec3f(&env->penv, &line);
@@ -71,35 +59,23 @@ static void exec_command(input_env *env, string line) {
     env->default_cam = false;
 
   } else if (cmd == "xfz") {
-    env->transform_ow = mat4_identity();
-    env->transform_wo = mat4_identity();
-    env->identity = true;
+    env->transform_ow = trans3_identity();
 
   } else if (cmd == "xft") {
     vec3f t = parse_vec3f(&env->penv, &line);
-    matrix4f tm = mat4_htranslate(t);
-    matrix4f im = mat4_htranslate(-t);
-    env->transform_ow = env->transform_ow * tm;
-    env->transform_wo = im * env->transform_wo;
-    env->identity = false;
+    env->transform_ow *= trans3_translate(t);
 
   } else if (cmd == "xfs") {
     vec3f s = parse_vec3f(&env->penv, &line);
-    matrix4f tm = mat4_hscale(s.x, s.y, s.z);
-    matrix4f im = mat4_hscale(1/s.x, 1/s.y, 1/s.z);
-    env->transform_ow = env->transform_ow * tm;
-    env->transform_wo = im * env->transform_wo;
-    env->identity = false;
+    if (s.x == 0 || s.y == 0 || s.z == 0)
+      parse_error(&env->penv, "Scaling factors should be finite and nonzero");
+    env->transform_ow *= trans3_scale(s.x, s.y, s.z);
 
   } else if (cmd == "xfr") {
     vec3f r = parse_vec3f(&env->penv, &line);
     rtfloat a = magnitude(r) * 3.14159265358979 / 180;
     r = normalize(r);
-    matrix4f tm = mat4_hrotate(r, a);
-    matrix4f im = mat4_hrotate(r, -a);
-    env->transform_ow = env->transform_ow * tm;
-    env->transform_wo = im * env->transform_wo;
-    env->identity = false;
+    env->transform_ow *= trans3_rotate(r, a);
 
   } else if (cmd == "lta") {
     light_source light;
@@ -108,7 +84,7 @@ static void exec_command(input_env *env, string line) {
     env->s->lights.push_back(light);
 
   } else if (cmd == "ltd") {
-    if (!env->identity)
+    if (!env->transform_ow.identity)
       parse_warning(&env->penv, "Transformations do not currently apply "
                                 "to lights");
     light_source light;
@@ -118,7 +94,7 @@ static void exec_command(input_env *env, string line) {
     env->s->lights.push_back(light);
 
   } else if (cmd == "ltp") {
-    if (!env->identity)
+    if (!env->transform_ow.identity)
       parse_warning(&env->penv, "Transformations do not currently apply "
                                 "to lights");
     light_source light;
@@ -184,6 +160,7 @@ static void exec_command(input_env *env, string line) {
 scene *scene_create(FILE *input, std::string filename) {
   input_env env;
   env.penv = parse_env_create(filename);
+  env.transform_ow = trans3_identity();
 
   env.s = new scene;
   env.s->camera = { {0,0,0}, {-0.5,-0.5,-1}, {0.5,-0.5,-1}, 

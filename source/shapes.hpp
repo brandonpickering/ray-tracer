@@ -24,7 +24,7 @@ struct triangle_object : scene_object {
   virtual ray_intersection ray_test(ray3f ray);
   virtual aa_box3f bounding_box();
   
-  virtual bool apply_affine(const matrix4f &trans, const matrix4f &inv);
+  virtual bool apply_affine(const transform3f &);
 };
 
 

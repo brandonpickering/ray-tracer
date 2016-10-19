@@ -24,19 +24,18 @@ static ray_intersection trace_ray(scene *s, ray3f ray) {
   for (scene_object *obj : cands) {
     ray_intersection inter = no_intersection(obj);
 
-    if (obj->transform_id) {
+    if (obj->transform_ow.identity) {
       inter = obj->ray_test(ray);
 
     } else {
-      ray3f oray = obj->transform_wo * ray;
+      ray3f oray = inv(obj->transform_ow) * ray;
       ray_intersection ointer = obj->ray_test(oray);
       vec3f nodir = ointer.dist * oray.dir;
       vec3f nwdir = project(obj->transform_ow * hvec(nodir));
       inter.dist = magnitude(nwdir) * invmagdir;
 
       if (inter.dist < result.dist)
-        inter.normal = trans_normal(ointer.normal, obj->transform_ow,
-                                    obj->transform_wo);
+        inter.normal = trans_normal(obj->transform_ow, ointer.normal);
     }
 
     if (inter.dist < result.dist)

@@ -160,8 +160,6 @@ ray3f operator*(const matrix4f &, ray3f);
 rtfloat det3(const matrix4f &);
 matrix4f transpose(const matrix4f &);
 
-vec3f trans_normal(vec3f normal, matrix4f trans, matrix4f trans_inv);
-
 matrix4f mat4_identity();
 matrix4f mat4_zero();
 matrix4f mat4_hzero();
@@ -172,6 +170,35 @@ matrix4f mat4_hrotate_y(rtfloat a);
 matrix4f mat4_hrotate_z(rtfloat a);
 matrix4f mat4_hrotate(vec3f axis, rtfloat a);
 matrix4f mat4_htranslate(vec3f v);
+
+
+
+/* Invertible affine transformation. Stores some additional info for efficient
+ * computation */
+
+struct transform3f {
+  bool identity;
+  rtfloat determinant;  // This is the det of the linear part,
+                        // not the 4x4 homogeneous matrix
+                        // This may become unaccurate with compositions,
+                        // but the sign will be correct
+
+  matrix4f matrix;
+  matrix4f inv_matrix;
+};
+
+transform3f inv(const transform3f &);
+vec3f trans_normal(const transform3f &, vec3f normal);
+
+transform3f operator*(const transform3f &, const transform3f &);
+vec4f operator*(const transform3f &, vec4f);
+ray3f operator*(const transform3f &, ray3f);
+transform3f &operator*=(transform3f &, const transform3f &);
+
+transform3f trans3_identity();
+transform3f trans3_scale(rtfloat x, rtfloat y, rtfloat z);
+transform3f trans3_rotate(vec3f axis, rtfloat a);
+transform3f trans3_translate(vec3f v);
 
 
 
@@ -210,6 +237,7 @@ void expand(aa_box3f *box1, aa_box3f box2);
 
 
 
+#include "transform.inl"
 #include "utils.inl"
 #include "vector.inl"
 #include "matrix.inl"
