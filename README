@@ -23,3 +23,21 @@ Command line flags:
       If str is linear|l, don't use any spatial partitioning.
       If str is bvh, use a bounding volume hierarchy.
       Default is linear.
+
+
+To render all examples (takes about 4 minutes on instructional machines):
+./as2 -s 1024 1024 -o examples/image-01.ppm examples/input-01
+./as2 -s 1024 1024 -f 4 -o examples/image-02.ppm examples/input-02
+./as2 -s 1024 1024 -f 4 -o examples/image-03.ppm examples/input-03
+./as2 -s 1024 1024 -f 4 -o examples/image-04.ppm examples/input-04
+./as2 -s 1024 1024 -f 4 -o examples/image-05.ppm examples/input-05
+./as2 -s 1024 1024 -f 4 -o examples/image-06.ppm examples/input-06
+./as2 -s 1024 1024 -f 4 -o examples/image-07.ppm examples/input-07
+./as2 -s 1024 1024 -f 4 -o examples/image-08.ppm examples/input-08
+./as2 -s 1024 1024 -f 4 -o examples/image-09.ppm examples/input-09
+./as2 -s 1024 1024 -f 4 -o examples/image-10.ppm examples/input-10
+./as2 -s 1024 1024 -f 4 -o examples/image-11.ppm examples/input-11
+./as2 -s 1024 1024 -f 4 -o examples/image-12.ppm examples/input-12
+./as2 -s 1024 1024 -f 4 -o examples/image-13.ppm examples/input-13
+./as2 -s 1024 1024 -S bvh -f 4 -o examples/image-14.ppm examples/input-14
+./as2 -s 1024 1024 -S bvh -f 4 -o examples/image-15.ppm examples/input-15
