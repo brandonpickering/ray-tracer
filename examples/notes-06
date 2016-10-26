@@ -1,0 +1,4 @@
+Command: ./as2 -s 1024 1024 -f 4 -o examples/image-06.ppm examples/input-06
+Runtime: 12.296s
+
+Point light with quadratic falloff. I had to brighten the light source to show the effect

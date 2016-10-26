@@ -1,0 +1,4 @@
+Command: ./as2 -s 1024 1024 -S bvh -f 4 -o examples/image-15.ppm examples/input-15
+Runtime: 27.1s
+
+Another demonstration of OBJ file loading and smooth shading. Because there are more objects, the scene and BVH take longer to load, but it is still quick to render

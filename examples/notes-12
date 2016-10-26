@@ -1,0 +1,4 @@
+Command: ./as2 -s 1024 1024 -f 4 -o examples/image-12.ppm examples/input-12
+Runtime: 6.924s
+
+Transformations. Red toothpick to demonstrate depth

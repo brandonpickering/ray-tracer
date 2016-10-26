@@ -1,0 +1,4 @@
+Command: ./as2 -s 1024 1024 -o examples/image-01.ppm examples/input-01
+Runtime: 0.692s
+
+Phong shading of a sphere. Every example except this one uses supersampling for antialiasing ('-f N' means NxN samples per pixel)
